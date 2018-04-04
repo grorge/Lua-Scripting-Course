@@ -55,7 +55,7 @@ int main()
 	irr::scene::ISceneManager* smgr		= device->getSceneManager();
 	irr::gui::IGUIEnvironment* guienv	= device->getGUIEnvironment();
 
-	smgr->addCameraSceneNode(0, irr::core::vector3df(0, 0, -20), irr::core::vector3df(0, 0, 0));
+	smgr->addCameraSceneNode(0, irr::core::vector3df(10, -10, -60), irr::core::vector3df(0, 0, 0));
 
 	Interface intf(driver, smgr, guienv);
 
@@ -66,6 +66,12 @@ int main()
 		Vertex(0, 10, 10)
 	};
 
+	irr::core::vector3d<irr::s32> pos1 = { 1, 1, 1 };
+	irr::core::vector3d<irr::s32> pos2 = { -1, -6, -1};
+
+	intf.addBox(pos1, 5);
+	intf.addBox({ -1, -15, -1 }, 5);
+	//intf.addMesh(vertexs);
 
 	//Object* testObj = new Object(smgr->getRootSceneNode(), smgr, 1337, vertexs, ARRAYSIZE(vertexs));
 
@@ -76,7 +82,7 @@ int main()
 
 		if (luaReturn == "addMesh")
 		{
-			intf.addMesh(vertexs);
+
 			luaReturn = "";
 		}
 

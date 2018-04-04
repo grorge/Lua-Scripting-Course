@@ -112,7 +112,7 @@ public:
 
 private:
 	//pos - normal - color - texturecoord	
-	irr::video::S3DVertex verts[36];
+	irr::video::S3DVertex verts[24];
 	irr::video::SMaterial mater;
 	irr::core::aabbox3d<irr::f32> bbox;
 };
