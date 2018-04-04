@@ -31,8 +31,8 @@ void ConsoleThread(lua_State* L) {
 		std::cin.getline(command, 1000);
 		if (luaL_loadstring(L, command) || lua_pcall(L, 0, 0, 0))
 		{
-			luaReturn = lua_tostring(L, -1);
-			std::cout << luaReturn  << '\n';
+			//luaReturn = lua_tostring(L, -1);
+			std::cout << lua_tostring(L, -1) << '\n';
 
 		}
 

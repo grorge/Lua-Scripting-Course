@@ -83,5 +83,38 @@ private:
 	irr::core::aabbox3d<irr::f32> bbox;
 };
 
+class Box : public irr::scene::ISceneNode
+{
+public:
+	Box(irr::scene::ISceneNode* parent, irr::scene::ISceneManager* smgr, irr::s32 ID,
+		Vertex* verts, int nrOfPoints);
+	~Box();
+
+	// All SceneNodes have thier checks if they are ready for rendering
+	virtual void OnRegisterSceneNode();
+
+	virtual void render();
+
+	virtual const irr::core::aabbox3d<irr::f32>& getBoundingBox() const
+	{
+		return this->bbox;
+	}
+
+	virtual irr::u32 getMaterialCount() const
+	{
+		return 1;
+	}
+
+	virtual irr::video::SMaterial& getMaterial(irr::u32 i)
+	{
+		return this->mater;
+	}
+
+private:
+	//pos - normal - color - texturecoord	
+	irr::video::S3DVertex verts[36];
+	irr::video::SMaterial mater;
+	irr::core::aabbox3d<irr::f32> bbox;
+};
 
 #endif // !INTERFACES_H
