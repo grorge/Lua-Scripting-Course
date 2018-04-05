@@ -15,23 +15,26 @@ Interface::~Interface()
 {
 }
 
-std::wstring Interface::addMesh(Vertex * verts)
+std::string Interface::addMesh(Vertex * verts)
 {
 	Object* testObj;
 	testObj = new Object(this->smgr->getRootSceneNode(), this->smgr, this->IDs, verts, 3);
+
+	this->nodes.push_back(testObj);
+
 	this->IDs++;
 	
-	return L"Simple Triangle in the plane.";
+	return "Simple Triangle in the plane.";
 }
 
-std::wstring Interface::addBox(irr::core::vector3d<irr::s32> pos, int size)
+std::string Interface::addBox(irr::core::vector3d<irr::s32> pos, int size)
 {
-	std::wstring generatedName = L"name" + this->IDs;
+	std::string generatedName = "name" + std::to_string( this->IDs);
 	
 	return addBox(pos, size, generatedName);
 }
 
-std::wstring Interface::addBox(irr::core::vector3d<irr::s32> pos, int size, std::wstring name)
+std::string Interface::addBox(irr::core::vector3d<irr::s32> pos, int size, std::string name)
 {
 	Vertex v[24] =
 	{
@@ -81,118 +84,39 @@ std::wstring Interface::addBox(irr::core::vector3d<irr::s32> pos, int size, std:
 	//}
 
 	Box* testObj;
-	testObj = new Box(this->smgr->getRootSceneNode(), this->smgr, this->IDs, v, 24);
+	testObj = new Box(this->smgr->getRootSceneNode(), this->smgr, this->IDs, v, 24, name);
+
+	this->nodes.push_back(testObj);
+
 	this->IDs++;
 
 
 
-	return std::wstring();
+	return std::string();
 }
 
-Object::Object(irr::scene::ISceneNode * parent, irr::scene::ISceneManager * smgr, irr::s32 ID, 
-	Vertex* verts, int nrOfPoint)
-	: irr::scene::ISceneNode(parent, smgr, ID)
+std::string Interface::getNodes()
 {
-	this->mater.Wireframe = false;
-	this->mater.Lighting = false;
+	std::string returnTable = "Boxes: \n";
 
-	for (int i = 0; i < nrOfPoint; i++)
+	for (int i = 0; i < this->nodes.size(); i++)
 	{
-		this->verts[i] = irr::video::S3DVertex(verts[i].vertexes.X, verts[i].vertexes.Y, verts[i].vertexes.Z,
-			0, 0, 1, irr::video::SColor(255, 0, 255, 255), 0, 1);
-	}
-	
-	this->bbox.reset(this->verts[0].Pos);
-	for (int i = 1; i < nrOfPoint; ++i)
-	{
-		this->bbox.addInternalPoint(this->verts[i].Pos);
-	}
-}
-
-Object::~Object()
-{
-}
-
-void Object::OnRegisterSceneNode()
-{
-	this->SceneManager->registerNodeForRendering(this);
-
-	ISceneNode::OnRegisterSceneNode();
-}
-
-void Object::render()
-{
-	irr::u16 indices[] = { 0,1,2 };
-	irr::video::IVideoDriver* driver = SceneManager->getVideoDriver();
-
-	driver->setMaterial(this->mater);
-	driver->setTransform(irr::video::ETS_WORLD, AbsoluteTransformation);
-	driver->drawVertexPrimitiveList(&this->verts[0], 1, &indices[0], 1, irr::video::EVT_STANDARD, irr::scene::EPT_TRIANGLES, irr::video::EIT_16BIT);
-}
-
-Box::Box(irr::scene::ISceneNode * parent, irr::scene::ISceneManager * smgr, irr::s32 ID, Vertex* verts, int nrOfPoints)
-	: irr::scene::ISceneNode(parent, smgr, ID)
-{
-	this->mater.Wireframe = false;
-	this->mater.Lighting = false;
-
-	for (int i = 0; i < nrOfPoints; i++)
-	{
-		this->verts[i] = irr::video::S3DVertex(verts[i].vertexes.X, verts[i].vertexes.Y, verts[i].vertexes.Z,
-			0, 0, 1, irr::video::SColor(255 * rand(), 255 * rand(), 255 * rand(), 255 * rand()), 0, 1);
+		std::string name = "No name";
+		if(dynamic_cast<Box*>(this->nodes[i]))
+			name = dynamic_cast<Box*>(this->nodes[i])->getName();
+		returnTable += std::to_string( this->nodes[i]->getID()) + "	" + name 
+			+ "\n";
 	}
 
-	this->bbox.reset(this->verts[0].Pos);
-	for (int i = 1; i < nrOfPoints; ++i)
-	{
-		this->bbox.addInternalPoint(this->verts[i].Pos);
-	}
+
+
+	return returnTable;
 }
 
-Box::~Box()
+std::string Interface::camera(irr::core::vector3df pos, irr::core::vector3df target)
 {
-}
+	smgr->addCameraSceneNode(0, pos, target);
 
-void Box::OnRegisterSceneNode()
-{
-	this->SceneManager->registerNodeForRendering(this);
 
-	ISceneNode::OnRegisterSceneNode();
-}
-
-void Box::render()
-{
-
-	irr::u16 indices[] = {
-		// Front Face
-		0,  1,  2,
-		0,  2,  3,
-
-		// Back Face
-		4,  5,  6,
-		4,  6,  7,
-
-		// Top Face
-		8,  9, 10,
-		8, 10, 11,
-
-		// Bottom Face
-		12, 13, 14,
-		12, 14, 15,
-
-		// Left Face
-		16, 17, 18,
-		16, 18, 19,
-
-		// Right Face
-		20, 21, 22,
-		20, 22, 23
-	};
-
-	//irr::u16 indices[] = { 0,1,2 };
-	irr::video::IVideoDriver* driver = SceneManager->getVideoDriver();
-
-	driver->setMaterial(this->mater);
-	driver->setTransform(irr::video::ETS_WORLD, AbsoluteTransformation);
-	driver->drawVertexPrimitiveList(&this->verts[0], 24, &indices[0], 12, irr::video::EVT_STANDARD, irr::scene::EPT_TRIANGLES, irr::video::EIT_16BIT);
+	return std::string();
 }

@@ -71,7 +71,9 @@ int main()
 
 	intf.addBox(pos1, 5);
 	intf.addBox({ -1, -15, -1 }, 5);
-	//intf.addMesh(vertexs);
+	intf.addMesh(vertexs);
+
+	std::cout << intf.getNodes();
 
 	//Object* testObj = new Object(smgr->getRootSceneNode(), smgr, 1337, vertexs, ARRAYSIZE(vertexs));
 
