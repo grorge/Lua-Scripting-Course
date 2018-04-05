@@ -14,15 +14,8 @@
 
 #include "Interfaces.h"
 
-/*
-SUPERVIKTIGA PIZZA-KOMMENTAREN
-Hawwai		2
-Red Devil	2
-La Mafia	1
-Lambada		1
-*/
-
-std::string luaReturn;
+// Global interface to call functions from the Lua terminal
+Interface intf;
 
 void ConsoleThread(lua_State* L) {
 	char command[1000];
@@ -31,12 +24,36 @@ void ConsoleThread(lua_State* L) {
 		std::cin.getline(command, 1000);
 		if (luaL_loadstring(L, command) || lua_pcall(L, 0, 0, 0))
 		{
-			//luaReturn = lua_tostring(L, -1);
 			std::cout << lua_tostring(L, -1) << '\n';
 
 		}
 
 	}
+}
+
+static int l_addBox(lua_State *L) {
+	int x = luaL_checknumber(L, 1);
+	int y = luaL_checknumber(L, 2);
+	int z = luaL_checknumber(L, 3);
+	intf.addBox({ x, y, z }, 5);
+	return 1;  /* number of results */
+}
+
+static int l_listNodes(lua_State *L) {
+	std::cout << intf.getNodes();
+	return 1;  /* number of results */
+}
+
+static int l_camera(lua_State *L) {
+	float x = luaL_checknumber(L, 1);
+	float y = luaL_checknumber(L, 2);
+	float z = luaL_checknumber(L, 3);
+
+	//int tx = luaL_checknumber(L, 4);
+	//int ty = luaL_checknumber(L, 5);
+	//int tz = luaL_checknumber(L, 6);
+	intf.camera({ x, y, z }, { 0, 0, 0 });
+	return 1;  /* number of results */
 }
 
 int main()
@@ -56,38 +73,42 @@ int main()
 	irr::gui::IGUIEnvironment* guienv	= device->getGUIEnvironment();
 
 
-	Interface intf(driver, smgr, guienv);
+	intf = Interface(driver, smgr, guienv);
 
-	Vertex vertexs[3] = 
+	// BINDING CFUNCTIONS TO LUA CALLS
+	lua_pushcfunction(L, l_addBox);
+	lua_setglobal(L, "addBox");
+	lua_pushcfunction(L, l_listNodes);
+	lua_setglobal(L, "listNodes");
+	lua_pushcfunction(L, l_camera);
+	lua_setglobal(L, "camera");
+
+
+
+	// HARDCODED C WORLD
+	intf.camera(irr::core::vector3df(30, -20, -60), irr::core::vector3df(0, 0, 0));
+	
+	//bad vertex system
+	Vertex vertexs[3] =
 	{ 
-		Vertex(15, -10, 10) ,
-		Vertex(-15, -10, 10) , 
-		Vertex(0, 10, 10)
+		Vertex(20, -20, 10) ,
+		Vertex(-20, -20, 10) , 
+		Vertex(0, 20, 10)
 	};
 
-	irr::core::vector3d<irr::s32> pos1 = { 1, 1, 1 };
-	irr::core::vector3d<irr::s32> pos2 = { -1, -6, -1};
+	irr::core::vector3d<irr::s32> pos1 = { 20, -20, 10 };
+	irr::core::vector3d<irr::s32> pos2 = { -20, -20, 10 };
 
-	intf.camera(irr::core::vector3df(30, -20, -60), irr::core::vector3df(0, 0, 0));
-
+	
 	intf.addBox(pos1, 5);
-	intf.addBox({ -1, -15, -1 }, 5);
+	intf.addBox(pos2, 5);
 	intf.addMesh(vertexs);
-
-	std::cout << intf.getNodes();
-
-	//Object* testObj = new Object(smgr->getRootSceneNode(), smgr, 1337, vertexs, ARRAYSIZE(vertexs));
 
 	guienv->addStaticText(L"Hello World! This is the Irrlicht Software renderer!", irr::core::rect<irr::s32>(10, 10, 260, 22), true);
 
 	while(device->run()) {
 		driver->beginScene(true, true, irr::video::SColor(255, 90, 101, 140));
 
-		if (luaReturn == "addMesh")
-		{
-
-			luaReturn = "";
-		}
 
 		smgr->drawAll();
 		guienv->drawAll();

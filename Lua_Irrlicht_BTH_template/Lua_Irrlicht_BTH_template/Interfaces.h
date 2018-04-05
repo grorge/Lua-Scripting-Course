@@ -12,6 +12,7 @@
 class Interface
 {
 public:
+	Interface();
 	Interface(irr::video::IVideoDriver* driver, irr::scene::ISceneManager* smgr, irr::gui::IGUIEnvironment* guienv);
 	~Interface();
 

@@ -2,6 +2,10 @@
 
 #include <math.h>
 
+Interface::Interface()
+{
+}
+
 Interface::Interface(irr::video::IVideoDriver * driver, irr::scene::ISceneManager * smgr, irr::gui::IGUIEnvironment * guienv)
 {
 	this->driver = driver;
@@ -74,15 +78,7 @@ std::string Interface::addBox(irr::core::vector3d<irr::s32> pos, int size, std::
 		Vertex(pos.X + 1.0f * size, pos.Y + 1.0f * size, pos.Z + 1.0f * size),
 		Vertex(pos.X + 1.0f * size, pos.Y - 1.0f * size, pos.Z + 1.0f * size),
 	};
-
-	//for (int i = 0; i < 24; i++)
-	//{
-	//	v[i].vertexes *= size;
-	//	//v[i].vertexes.X *= size;
-	//	//v[i].vertexes.Y *= size;
-	//	//v[i].vertexes.Z *= size;
-	//}
-
+		
 	Box* testObj;
 	testObj = new Box(this->smgr->getRootSceneNode(), this->smgr, this->IDs, v, 24, name);
 
@@ -101,7 +97,7 @@ std::string Interface::getNodes()
 
 	for (int i = 0; i < this->nodes.size(); i++)
 	{
-		std::string name = "No name";
+		std::string name = "NaN";
 		if(dynamic_cast<Box*>(this->nodes[i]))
 			name = dynamic_cast<Box*>(this->nodes[i])->getName();
 		returnTable += std::to_string( this->nodes[i]->getID()) + "	" + name 
@@ -116,7 +112,6 @@ std::string Interface::getNodes()
 std::string Interface::camera(irr::core::vector3df pos, irr::core::vector3df target)
 {
 	smgr->addCameraSceneNode(0, pos, target);
-
-
+	
 	return std::string();
 }
