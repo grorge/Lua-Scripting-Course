@@ -51,10 +51,169 @@ Box::Box(irr::scene::ISceneNode * parent, irr::scene::ISceneManager * smgr, irr:
 	this->mater.Wireframe = false;
 	this->mater.Lighting = false;
 
+	irr::core::vector3di normal = { 0, 0, 1};
+	int tu = 0;
+	int tv = 0;
+
 	for (int i = 0; i < nrOfPoints; i++)
 	{
-		this->verts[i] = irr::video::S3DVertex(verts[i].vertexes.X, verts[i].vertexes.Y, verts[i].vertexes.Z,
-			0, 0, 1, irr::video::SColor(255 * rand(), 255 * rand(), 255 * rand(), 255 * rand()), 0, 1);
+		if (i < 4)
+		{
+			normal = { 0, 0, 1 };
+
+			if (i % 4 == 0)
+			{
+				tu = 0;
+				tv = 1;
+			}
+			else if (i % 4 == 1)
+			{
+				tu = 0;
+				tv = 0;
+			}
+			else if (i % 4 == 2)
+			{
+				tu = 1;
+				tv = 0;
+			}
+			else
+			{
+				tu = 1;
+				tv = 1;
+			}
+		}
+		else if (i < 8)
+		{
+			normal = { 0, 0, -1 };
+
+			if (i % 4 == 0)
+			{
+				tu = 1;
+				tv = 1;
+			}
+			else if (i % 4 == 1)
+			{
+				tu = 0;
+				tv = 1;
+			}
+			else if (i % 4 == 2)
+			{
+				tu = 0;
+				tv = 0;
+			}
+			else
+			{
+				tu = 1;
+				tv = 0;
+			}
+		}
+		else if (i < 12)
+		{
+			normal = { 0, 1, 0 };
+
+			if (i % 4 == 0)
+			{
+				tu = 0;
+				tv = 1;
+			}
+			else if (i % 4 == 1)
+			{
+				tu = 0;
+				tv = 0;
+			}
+			else if (i % 4 == 2)
+			{
+				tu = 1;
+				tv = 0;
+			}
+			else
+			{
+				tu = 1;
+				tv = 1;
+			}
+		}
+		else if (i < 16)
+		{
+			normal = { 0, -1, 0 };
+
+			if (i % 4 == 0)
+			{
+				tu = 1;
+				tv = 1;
+			}
+			else if (i % 4 == 1)
+			{
+				tu = 0;
+				tv = 1;
+			}
+			else if (i % 4 == 2)
+			{
+				tu = 0;
+				tv = 0;
+			}
+			else
+			{
+				tu = 1;
+				tv = 0;
+			}
+		}
+		else if (i < 20)
+		{
+			normal = { -1, 0, 0 };
+
+			if (i % 4 == 0)
+			{
+				tu = 0;
+				tv = 1;
+			}
+			else if (i % 4 == 1)
+			{
+				tu = 0;
+				tv = 0;
+			}
+			else if (i % 4 == 2)
+			{
+				tu = 1;
+				tv = 0;
+			}
+			else
+			{
+				tu = 1;
+				tv = 1;
+			}
+		}
+		else if (i < 24)
+		{
+			normal = { 1, 0, 0 };
+
+			if (i % 4 == 0)
+			{
+				tu = 0;
+				tv = 1;
+			}
+			else if (i % 4 == 1)
+			{
+				tu = 0;
+				tv = 0;
+			}
+			else if (i % 4 == 2)
+			{
+				tu = 1;
+				tv = 0;
+			}
+			else
+			{
+				tu = 1;
+				tv = 1;
+			}
+		}
+
+
+		this->verts[i] = irr::video::S3DVertex(
+			verts[i].vertexes.X, verts[i].vertexes.Y, verts[i].vertexes.Z,
+			normal.X, normal.Y, normal.Z, 
+			irr::video::SColor(255 * rand(), 255 * rand(), 255 * rand(), 255 * rand()), 
+			tu, tv);
 	}
 
 	this->bbox.reset(this->verts[0].Pos);

@@ -55,7 +55,6 @@ int main()
 	irr::scene::ISceneManager* smgr		= device->getSceneManager();
 	irr::gui::IGUIEnvironment* guienv	= device->getGUIEnvironment();
 
-	smgr->addCameraSceneNode(0, irr::core::vector3df(10, -10, -60), irr::core::vector3df(0, 0, 0));
 
 	Interface intf(driver, smgr, guienv);
 
@@ -68,6 +67,8 @@ int main()
 
 	irr::core::vector3d<irr::s32> pos1 = { 1, 1, 1 };
 	irr::core::vector3d<irr::s32> pos2 = { -1, -6, -1};
+
+	intf.camera(irr::core::vector3df(30, -20, -60), irr::core::vector3df(0, 0, 0));
 
 	intf.addBox(pos1, 5);
 	intf.addBox({ -1, -15, -1 }, 5);
