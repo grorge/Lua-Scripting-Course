@@ -6,13 +6,31 @@ Interface::Interface()
 {
 }
 
-Interface::Interface(irr::video::IVideoDriver * driver, irr::scene::ISceneManager * smgr, irr::gui::IGUIEnvironment * guienv)
+Interface::Interface(irr::video::IVideoDriver * driver, irr::scene::ISceneManager * smgr, irr::gui::IGUIEnvironment * guienv, lua_State* L_state)
 {
+	this->L = L_state;
+
 	this->driver = driver;
 	this->smgr = smgr;
 	this->guienv = guienv;
 
 	this->IDs = 100;
+
+
+	//Default modle for Labb 1
+	irr::scene::IAnimatedMesh* mesh = smgr->getMesh("../Meshes/sydney.md2");
+	irr::scene::IAnimatedMeshSceneNode* node = smgr->addAnimatedMeshSceneNode(mesh);
+	if (node)
+	{
+		node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+		node->setMD2Animation(irr::scene::EMAT_STAND);
+		node->setMaterialTexture(0, driver->getTexture("../Meshes/sydney.bmp"));
+	}
+	node->setID(this->IDs);
+
+	this->nodes.push_back(node);
+
+	this->IDs++;
 }
 
 Interface::~Interface()
@@ -29,6 +47,32 @@ std::string Interface::addMesh(Vertex * verts)
 	this->IDs++;
 	
 	return "Simple Triangle in the plane.";
+}
+
+std::string Interface::updatepos(irr::core::vector3df pos)
+{
+	this->nodes[0]->setPosition(pos);
+
+	return std::string();
+}
+
+int Interface::getpos()
+{
+
+	lua_newtable(this->L);
+
+	lua_pushnumber(this->L, this->nodes[0]->getPosition().X);
+	lua_rawseti(this->L, -2, 1); 
+	/* (lua_state - where is the stack the table is - where in the table the data is stored )*/
+	// The data is the data that is ontop of the stack
+	lua_pushnumber(this->L, this->nodes[0]->getPosition().Y);
+	lua_rawseti(this->L, -2, 2);
+	lua_pushnumber(this->L, this->nodes[0]->getPosition().Z);
+	lua_rawseti(this->L, -2, 3);
+
+
+
+	return 1;
 }
 
 std::string Interface::addBox(irr::core::vector3d<irr::s32> pos, int size)
@@ -97,7 +141,7 @@ std::string Interface::getNodes()
 
 	for (int i = 0; i < this->nodes.size(); i++)
 	{
-		std::string name = "NaN";
+		std::string name = "NaN mesh";
 		if(dynamic_cast<Box*>(this->nodes[i]))
 			name = dynamic_cast<Box*>(this->nodes[i])->getName();
 		returnTable += std::to_string( this->nodes[i]->getID()) + "	" + name 

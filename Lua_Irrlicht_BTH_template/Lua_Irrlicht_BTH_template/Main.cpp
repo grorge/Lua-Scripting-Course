@@ -5,14 +5,13 @@
 #pragma comment(lib, "Lualib.lib")
 #endif
 
-#include <lua.hpp>
 #include <Windows.h>
 #include <iostream>
 #include <thread>
-#include "lua.hpp"
 #include <irrlicht.h>
 
 #include "Interfaces.h"
+//#include <IAnimatedMeshMD2.h>
 
 // Global interface to call functions from the Lua terminal
 Interface intf;
@@ -30,6 +29,7 @@ void ConsoleThread(lua_State* L) {
 
 	}
 }
+
 
 static int l_addBox(lua_State *L) {
 	int x = luaL_checknumber(L, 1);
@@ -56,6 +56,21 @@ static int l_camera(lua_State *L) {
 	return 1;  /* number of results */
 }
 
+static int l_updatepos(lua_State *L) {
+	float x = luaL_checknumber(L, 1);
+	float y = luaL_checknumber(L, 2);
+	float z = luaL_checknumber(L, 3);
+
+	intf.updatepos({ x, y, z });
+	return 0;  /* number of results */
+}
+
+static int l_getpos(lua_State *L) {
+
+	//intf.getpos();
+	return intf.getpos();  /* number of results */
+}
+
 int main()
 {
 	lua_State* L = luaL_newstate();
@@ -73,7 +88,7 @@ int main()
 	irr::gui::IGUIEnvironment* guienv	= device->getGUIEnvironment();
 
 
-	intf = Interface(driver, smgr, guienv);
+	intf = Interface(driver, smgr, guienv, L);
 
 	// BINDING CFUNCTIONS TO LUA CALLS
 	lua_pushcfunction(L, l_addBox);
@@ -82,6 +97,11 @@ int main()
 	lua_setglobal(L, "listNodes");
 	lua_pushcfunction(L, l_camera);
 	lua_setglobal(L, "camera");
+
+	lua_pushcfunction(L, l_updatepos);
+	lua_setglobal(L, "updatepos");
+	lua_pushcfunction(L, l_getpos);
+	lua_setglobal(L, "getpos");
 
 
 
@@ -103,6 +123,9 @@ int main()
 	intf.addBox(pos1, 5);
 	intf.addBox(pos2, 5);
 	intf.addMesh(vertexs);
+
+
+	
 
 	guienv->addStaticText(L"Hello World! This is the Irrlicht Software renderer!", irr::core::rect<irr::s32>(10, 10, 260, 22), true);
 
