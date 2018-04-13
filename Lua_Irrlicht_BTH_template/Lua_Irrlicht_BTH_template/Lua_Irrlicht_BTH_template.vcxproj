@@ -148,6 +148,9 @@
     <ClInclude Include="Interfaces.h" />
     <ClInclude Include="Object.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="testfile.lua" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

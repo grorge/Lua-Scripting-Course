@@ -61,17 +61,19 @@ int Interface::getpos()
 
 	lua_newtable(this->L);
 
+	// Pushes the number in the second arg to the top of hte stack
 	lua_pushnumber(this->L, this->nodes[0]->getPosition().X);
-	lua_rawseti(this->L, -2, 1); 
 	/* (lua_state - where is the stack the table is - where in the table the data is stored )*/
 	// The data is the data that is ontop of the stack
+	lua_rawseti(this->L, -2, 1); 
 	lua_pushnumber(this->L, this->nodes[0]->getPosition().Y);
 	lua_rawseti(this->L, -2, 2);
 	lua_pushnumber(this->L, this->nodes[0]->getPosition().Z);
 	lua_rawseti(this->L, -2, 3);
 
 
-
+	// Retunerar antalet värden som retuneras till Lua
+	// Den säger till lua att den har lagt 1 värde på stacken
 	return 1;
 }
 
