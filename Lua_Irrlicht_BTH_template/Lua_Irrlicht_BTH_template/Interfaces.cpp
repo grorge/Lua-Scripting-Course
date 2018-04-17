@@ -1,7 +1,7 @@
 #include "Interfaces.h"
 
 #include <math.h>
-
+#include <IImage.h>
 
 Interface::Interface()
 {
@@ -186,7 +186,9 @@ int Interface::camera(irr::core::vector3df pos, irr::core::vector3df target)
 
 int Interface::snapshot(std::string filename)
 {
-	irr::core::Image screenshot = this->driver->createScreenShot();
+	irr::video::IImage* screenshot = this->driver->createScreenShot();
+	
+	this->driver->writeImageToFile(screenshot, filename.c_str());
 
 	return 1;
 }

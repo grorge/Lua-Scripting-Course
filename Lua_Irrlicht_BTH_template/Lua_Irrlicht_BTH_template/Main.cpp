@@ -106,7 +106,7 @@ static int l_snapshot(lua_State *L) {
 
 	std::string filePath = "C:/Users/maxjo/Source/Repos/Lua-Scripting-Course/Lua_Irrlicht_BTH_template/Lua_Irrlicht_BTH_template/" + fileName;
 
-	return intf.snapshot(fileName); 
+	return intf.snapshot(filePath); 
 }
 
 static int l_loadScene(lua_State *L) {
@@ -163,6 +163,8 @@ int main()
 	lua_setglobal(L, "getpos");
 	lua_pushcfunction(L, l_loadScene);
 	lua_setglobal(L, "loadScene");
+	lua_pushcfunction(L, l_snapshot);
+	lua_setglobal(L, "snapshot");
 
 
 
