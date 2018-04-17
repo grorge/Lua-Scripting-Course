@@ -96,11 +96,7 @@ int main()
 	Det är inte en starndarn interperter
 	*/
 	luaL_openlibs(L);
-
-
-	// Error blir 7 och sen 2 ????????????????????????????????????
-	int error = luaL_loadfile(L, "../testfile.lua");
-	error = lua_pcall(L, 0, 0, 0);
+	
 
 
 		std::thread conThread(ConsoleThread, L);
@@ -159,6 +155,19 @@ int main()
 
 
 	guienv->addStaticText(L"Hello World! This is the Irrlicht Software renderer!", irr::core::rect<irr::s32>(10, 10, 260, 22), true);
+
+
+	// Loads the lua testfile
+	int error = luaL_loadfile(L, "C:/Users/maxjo/Source/Repos/Lua-Scripting-Course/Lua_Irrlicht_BTH_template/Lua_Irrlicht_BTH_template/testfile.lua");
+	if (error) {
+		/* If something went wrong, error message is at the top of */
+		/* the stack */
+		std::cout << lua_tostring(L, -1) << std::endl;
+	}
+	error = lua_pcall(L, 0, 0, 0);
+
+
+
 
 	while(device->run()) {
 		driver->beginScene(true, true, irr::video::SColor(255, 90, 101, 140));

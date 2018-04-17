@@ -71,7 +71,6 @@ int Interface::getpos()
 	lua_pushnumber(this->L, this->nodes[0]->getPosition().Z);
 	lua_rawseti(this->L, -2, 3);
 
-
 	// Retunerar antalet värden som retuneras till Lua
 	// Den säger till lua att den har lagt 1 värde på stacken
 	return 1;
