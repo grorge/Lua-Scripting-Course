@@ -50,17 +50,73 @@ static int l_addBox(lua_State *L) {
 }
 
 static int l_addMesh(lua_State *L) {
-	int x0 = luaL_checknumber(L, 1);
-	int y0 = luaL_checknumber(L, 2);
-	int z0 = luaL_checknumber(L, 3);
 
-	int x1 = luaL_checknumber(L, 4);
-	int y1 = luaL_checknumber(L, 5);
-	int z1 = luaL_checknumber(L, 6);
+	int nrOfTables = 0;
+	int hej = 0;
+	int isthis4 = 0;
 
-	int x2 = luaL_checknumber(L, 7);
-	int y2 = luaL_checknumber(L, 8);
-	int z2 = luaL_checknumber(L, 9);
+	int x0 = 0;
+	int y0 = 0;
+	int z0 = 0;
+
+	int x1 = 0;
+	int y1 = 0;
+	int z1 = 0;
+
+	int x2 = 0;
+	int y2 = 0;
+	int z2 = 0;
+
+	// ses the number of elements in stack
+	nrOfTables = lua_gettop(L);
+
+	// It is one table on the stack
+	if (nrOfTables == 1 && lua_istable(L, 1))
+	{
+		// pushes the table on the first place in the table
+		isthis4 = lua_rawgeti(L, 1, 1);
+		if (lua_istable(L, -1) == 1)
+		{
+			nrOfTables = lua_gettop(L);
+			// pushes the first element in the table to the stack
+			isthis4 = lua_rawgeti(L, -1, 1);
+			// checks if its a number
+			hej = lua_isnumber(L, -1);
+			// adds the cumber to the x0 var
+			x0 = luaL_checknumber(L, -1);
+			// pops the element
+			lua_pop(L, 1);
+			nrOfTables = lua_gettop(L);
+		}
+		// Pops the table in the first place from the stack
+		lua_pop(L, 1);
+
+		// pushes the table on the second place in the table
+		isthis4 = lua_rawgeti(L, 1, 2);
+		if (lua_istable(L, -1) == 1)
+		{
+			isthis4 = lua_rawgeti(L, -1, 2);
+			nrOfTables = lua_gettop(L);
+			hej = lua_isnumber(L, -1);
+			lua_pop(L, 2);
+		}
+
+		// pushes the table on the third place in the table
+		isthis4 = lua_rawgeti(L, 1, 3);
+		if (lua_istable(L, -1) == 1)
+		{
+			isthis4 = lua_rawgeti(L, -1, 2);
+			nrOfTables = lua_gettop(L);
+			hej = lua_isnumber(L, -1);
+			lua_pop(L, 2);
+		}
+	}
+	nrOfTables = lua_gettop(L);
+	
+	lua_pushnumber(L, 2);
+	isthis4 = lua_gettable(L, -2);
+
+
 
 
 	intf.addMesh({ x0, y0, z0 }, { x1, y1, z1 }, { x2, y2, z2 });
