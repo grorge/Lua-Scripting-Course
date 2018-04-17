@@ -2,6 +2,7 @@
 
 #include <math.h>
 
+
 Interface::Interface()
 {
 }
@@ -37,23 +38,30 @@ Interface::~Interface()
 {
 }
 
-std::string Interface::addMesh(Vertex * verts)
+int Interface::addMesh(irr::core::vector3d<irr::s32> pos0, irr::core::vector3d<irr::s32> pos1, irr::core::vector3d<irr::s32> pos2)
 {
 	Object* testObj;
+
+	Vertex verts[3] = {
+		Vertex(pos0.X, pos0.Y, pos0.Z),
+		Vertex(pos1.X, pos1.Y, pos1.Z),
+		Vertex(pos2.X, pos2.Y, pos2.Z)
+	};
+
 	testObj = new Object(this->smgr->getRootSceneNode(), this->smgr, this->IDs, verts, 3);
 
 	this->nodes.push_back(testObj);
 
 	this->IDs++;
 	
-	return "Simple Triangle in the plane.";
+	return 1;
 }
 
-std::string Interface::updatepos(irr::core::vector3df pos)
+int Interface::updatepos(irr::core::vector3df pos)
 {
 	this->nodes[0]->setPosition(pos);
 
-	return std::string();
+	return int();
 }
 
 int Interface::getpos()
@@ -77,14 +85,14 @@ int Interface::getpos()
 	return 1;
 }
 
-std::string Interface::addBox(irr::core::vector3d<irr::s32> pos, int size)
+int Interface::addBox(irr::core::vector3d<irr::s32> pos, int size)
 {
 	std::string generatedName = "name" + std::to_string( this->IDs);
 	
 	return addBox(pos, size, generatedName);
 }
 
-std::string Interface::addBox(irr::core::vector3d<irr::s32> pos, int size, std::string name)
+int Interface::addBox(irr::core::vector3d<irr::s32> pos, int size, std::string name)
 {
 	Vertex v[24] =
 	{
@@ -134,30 +142,51 @@ std::string Interface::addBox(irr::core::vector3d<irr::s32> pos, int size, std::
 
 
 
-	return std::string();
+	return int();
 }
 
-std::string Interface::getNodes()
+int Interface::getNodes()
 {
 	std::string returnTable = "Boxes: \n";
+
+	lua_newtable(this->L);
 
 	for (int i = 0; i < this->nodes.size(); i++)
 	{
 		std::string name = "NaN mesh";
-		if(dynamic_cast<Box*>(this->nodes[i]))
+		if (dynamic_cast<Box*>(this->nodes[i]))
+		{
 			name = dynamic_cast<Box*>(this->nodes[i])->getName();
-		returnTable += std::to_string( this->nodes[i]->getID()) + "	" + name 
+		}
+
+		returnTable = std::to_string( this->nodes[i]->getID()) + "	" + name 
 			+ "\n";
+		
+		//const char* toTable = returnTable.c_str();
+
+		// Pushes the number in the second arg to the top of hte stack
+		lua_pushstring(this->L, returnTable.c_str());
+		/* (lua_state - where is the stack the table is - where in the table the data is stored )*/
+		// The data is the data that 
+		lua_rawseti(this->L, -2, i+1);
 	}
 
 
+	
 
-	return returnTable;
+	return 1;
 }
 
-std::string Interface::camera(irr::core::vector3df pos, irr::core::vector3df target)
+int Interface::camera(irr::core::vector3df pos, irr::core::vector3df target)
 {
 	smgr->addCameraSceneNode(0, pos, target);
 	
-	return std::string();
+	return int();
+}
+
+int Interface::snapshot(std::string filename)
+{
+	irr::core::Image screenshot = this->driver->createScreenShot();
+
+	return 1;
 }

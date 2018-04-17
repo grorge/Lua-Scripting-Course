@@ -20,13 +20,7 @@ void ConsoleThread(lua_State* L) {
 	while(GetConsoleWindow()) {
 		memset(command, 0, 1000);
 		std::cin.getline(command, 1000);
-		/*
-		Dessa två är de som laddar in commandot och sedan exekverar det som ligger överst på stacken
-		De kommer retunera 1 om de är fel
-		pcall(state. antal inparametrar . antal returvärde . index på stacken (där funktionen 
-			som ska hantera fel ligger )
-		Kan använda pcall för att 
-		*/
+		
 		if (luaL_loadstring(L, command) || lua_pcall(L, 0, 0, 0))
 		{
 			// Hämtar en sträng från stacken med index -1 som är överst i stacken
@@ -46,13 +40,36 @@ static int l_addBox(lua_State *L) {
 	int x = luaL_checknumber(L, 1);
 	int y = luaL_checknumber(L, 2);
 	int z = luaL_checknumber(L, 3);
-	intf.addBox({ x, y, z }, 5);
+
+	int s = luaL_checknumber(L, 4);
+
+	std::string boxName = luaL_checkstring(L, 5);
+
+	intf.addBox({ x, y, z }, s, boxName);
+	return 1;  /* number of results */
+}
+
+static int l_addMesh(lua_State *L) {
+	int x0 = luaL_checknumber(L, 1);
+	int y0 = luaL_checknumber(L, 2);
+	int z0 = luaL_checknumber(L, 3);
+
+	int x1 = luaL_checknumber(L, 4);
+	int y1 = luaL_checknumber(L, 5);
+	int z1 = luaL_checknumber(L, 6);
+
+	int x2 = luaL_checknumber(L, 7);
+	int y2 = luaL_checknumber(L, 8);
+	int z2 = luaL_checknumber(L, 9);
+
+
+	intf.addMesh({ x0, y0, z0 }, { x1, y1, z1 }, { x2, y2, z2 });
 	return 1;  /* number of results */
 }
 
 static int l_listNodes(lua_State *L) {
-	std::cout << intf.getNodes();
-	return 1;  /* number of results */
+	//intf.getNodes();
+	return intf.getNodes();;  /* number of results */
 }
 
 static int l_camera(lua_State *L) {
@@ -60,10 +77,10 @@ static int l_camera(lua_State *L) {
 	float y = luaL_checknumber(L, 2);
 	float z = luaL_checknumber(L, 3);
 
-	//int tx = luaL_checknumber(L, 4);
-	//int ty = luaL_checknumber(L, 5);
-	//int tz = luaL_checknumber(L, 6);
-	intf.camera({ x, y, z }, { 0, 0, 0 });
+	float tx = luaL_checknumber(L, 4);
+	float ty = luaL_checknumber(L, 5);
+	float tz = luaL_checknumber(L, 6);
+	intf.camera({ x, y, z }, { tx, ty, tz });
 	return 1;  /* number of results */
 }
 
@@ -82,26 +99,39 @@ static int l_getpos(lua_State *L) {
 	return intf.getpos();  /* number of results */
 }
 
-int main()
-{
-	/* 
-	Ett lua state som skapar ma ne nLua miljö
-	Skickar med statet när man binder funtioner och kan använda dessa i Lua commanden
-	Varje state har en egen stack
-	*/
-	lua_State* L = luaL_newstate();
-
-	/*
-	LuaL är för att hjälpa till med kom mellan C och Lua
-	Det är inte en starndarn interperter
-	*/
-	luaL_openlibs(L);
+static int l_snapshot(lua_State *L) {
 
 
-	// Error blir 7 och sen 2 ????????????????????????????????????
-	int error = luaL_loadfile(L, "../testfile.lua");
+	std::string fileName = luaL_checkstring(L, -1);
+
+	std::string filePath = "C:/Users/maxjo/Source/Repos/Lua-Scripting-Course/Lua_Irrlicht_BTH_template/Lua_Irrlicht_BTH_template/" + fileName;
+
+	return intf.snapshot(fileName); 
+}
+
+static int l_loadScene(lua_State *L) {
+
+	std::string fileName = luaL_checkstring(L, -1);
+
+	std::string filePath = "C:/Users/maxjo/Source/Repos/Lua-Scripting-Course/Lua_Irrlicht_BTH_template/Lua_Irrlicht_BTH_template/" + fileName;
+
+	int error = luaL_loadfile(L, filePath.c_str());
+	if (error) {
+		/* If something went wrong, error message is at the top of */
+		/* the stack */
+		std::cout << lua_tostring(L, -1) << std::endl;
+	}
 	error = lua_pcall(L, 0, 0, 0);
 
+	return intf.getpos();  /* number of results */
+}
+
+
+int main()
+{
+	lua_State* L = luaL_newstate();
+
+	luaL_openlibs(L);
 
 		std::thread conThread(ConsoleThread, L);
 
@@ -118,14 +148,12 @@ int main()
 	intf = Interface(driver, smgr, guienv, L);
 
 	// BINDING CFUNCTIONS TO LUA CALLS
-	/*
-	pushar en pekare til funktionen till stacken
-	sen sätter addBox som en global i Lua som binder den till det som ligger överst i stacken
-	*/
 	lua_pushcfunction(L, l_addBox);
 	lua_setglobal(L, "addBox");
+	lua_pushcfunction(L, l_addMesh);
+	lua_setglobal(L, "addMesh");
 	lua_pushcfunction(L, l_listNodes);
-	lua_setglobal(L, "listNodes");
+	lua_setglobal(L, "getNodes");
 	lua_pushcfunction(L, l_camera);
 	lua_setglobal(L, "camera");
 
@@ -133,6 +161,8 @@ int main()
 	lua_setglobal(L, "updatepos");
 	lua_pushcfunction(L, l_getpos);
 	lua_setglobal(L, "getpos");
+	lua_pushcfunction(L, l_loadScene);
+	lua_setglobal(L, "loadScene");
 
 
 
@@ -140,12 +170,12 @@ int main()
 	intf.camera(irr::core::vector3df(30, -20, -60), irr::core::vector3df(0, 0, 0));
 	
 	//bad vertex system
-	Vertex vertexs[3] =
-	{ 
-		Vertex(20, -20, 10) ,
-		Vertex(-20, -20, 10) , 
-		Vertex(0, 20, 10)
-	};
+	//Vertex vertexs[3] =
+	//{ 
+	//	Vertex(20, -20, 10) ,
+	//	Vertex(-20, -20, 10) , 
+	//	Vertex(0, 20, 10)
+	//};
 
 	irr::core::vector3d<irr::s32> pos1 = { 20, -20, 10 };
 	irr::core::vector3d<irr::s32> pos2 = { -20, -20, 10 };
@@ -153,12 +183,21 @@ int main()
 	
 	intf.addBox(pos1, 5);
 	intf.addBox(pos2, 5);
-	intf.addMesh(vertexs);
+	//intf.addMesh(vertexs);
 
 
 
 
 	guienv->addStaticText(L"Hello World! This is the Irrlicht Software renderer!", irr::core::rect<irr::s32>(10, 10, 260, 22), true);
+
+	// Loads the lua testfile
+	int error = luaL_loadfile(L, "C:/Users/maxjo/Source/Repos/Lua-Scripting-Course/Lua_Irrlicht_BTH_template/Lua_Irrlicht_BTH_template/testfile.lua");
+	if (error) {
+		/* If something went wrong, error message is at the top of */
+		/* the stack */
+		std::cout << lua_tostring(L, -1) << std::endl;
+	}
+	error = lua_pcall(L, 0, 0, 0);
 
 	while(device->run()) {
 		driver->beginScene(true, true, irr::video::SColor(255, 90, 101, 140));
@@ -176,60 +215,3 @@ int main()
 	return 0;
 }
 
-
-/*
------- FAKTA
----Globals
-Alla variabler blir globala när man skriver .lua kod
-
-När man skriver .lua så kan man deklarera variabler som kan hämtas med getglobal
-Men dess kommer inte att hamna i stacken förän vi använder getglobal
-
-
----Tabeller
-Tabbeller kommer att kunna deklarerars 
-
-För att hämta ett värde: 
-	* hämtar man först tabbellen men getglobal()
-	* sen hämtar ett indexerat värde genom att:
-		- pusha ett index med lua_pushstring() eller 
-		- sedan köra lua_gettable() med sIndex som tabellen ligger på
-Notera att hämt atabellen görs inte av gettable för den är en global och använder sig därför av getglobal
-	
----Funktioner i Lua som hanteras av C++
-getgloblan för att hämta
-Sedan pusha alla argument i samma ordning
-sedan göra pcall med antalaet inparametrar
-return läggs i stacken i den ordning som de skrivs ut.
-	Ex: return hej, hejdå, tjabba
-		-1: tjabba	:3
-		-2: hejdå	:2
-		-3: hej		:1
-
-
----Closure
-Man kan göra det som står i ---Funktioner med Closures istället
-Läs på om lua_pushcclosure
-
-
-
------- FUNKTIONER
-
-lua_is*  
-	kollar om ett värde är korrekt
-
-lua_getglobal 
-	hämtar den global variablen som har samma namn som arg
-	lägger det elementet på stacken
-
-lua_setglobal 
-	sätter ett det som ligger på stacken till en variable med namnet i arg
-
-lua_pushcclosure
-	har argumen:
-		- state
-		- pekare till funktionen
-		- minnesalokering????
-
-
-*/

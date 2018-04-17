@@ -149,6 +149,7 @@
     <ClInclude Include="Object.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="test1.lua" />
     <None Include="testfile.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

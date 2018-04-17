@@ -37,5 +37,6 @@
     <None Include="testfile.lua">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="test1.lua" />
   </ItemGroup>
 </Project>

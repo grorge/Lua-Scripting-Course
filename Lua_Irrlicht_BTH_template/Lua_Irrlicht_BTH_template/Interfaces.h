@@ -18,20 +18,20 @@ public:
 	Interface(irr::video::IVideoDriver* driver, irr::scene::ISceneManager* smgr, irr::gui::IGUIEnvironment* guienv, lua_State* L_state);
 	~Interface();
 
-	std::string loadScene(std::string filename);
+	int loadScene(std::string filename);
 
-	std::string addMesh(Vertex* verts);
-	std::string updatepos(irr::core::vector3df pos);
+	int addMesh(irr::core::vector3d<irr::s32> pos0, irr::core::vector3d<irr::s32> pos1, irr::core::vector3d<irr::s32> pos2);
+	int updatepos(irr::core::vector3df pos);
 	int getpos();
-	std::string addBox(irr::core::vector3d<irr::s32> pos, int size);
-	std::string addBox(irr::core::vector3d<irr::s32> pos, int size, std::string name);
+	int addBox(irr::core::vector3d<irr::s32> pos, int size);
+	int addBox(irr::core::vector3d<irr::s32> pos, int size, std::string name);
 
-	std::string getNodes();
-	std::string camera(irr::core::vector3df pos, irr::core::vector3df target);
-	std::string snapshot(std::string filename);
+	int getNodes();
+	int camera(irr::core::vector3df pos, irr::core::vector3df target);
+	int snapshot(std::string filename);
 	
-	std::string addTexture(irr::video::SColor color, std::string name);
-	std::string bind(std::string node, std::string texture);
+	int addTexture(irr::video::SColor color, std::string name);
+	int bind(std::string node, std::string texture);
 	
 private:
 	lua_State* L;
