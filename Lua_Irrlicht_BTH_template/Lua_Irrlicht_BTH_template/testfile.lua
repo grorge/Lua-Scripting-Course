@@ -2,9 +2,9 @@ print("--Loading Testfile--")
 
 var = 4
 
-addBox(1,2,1, 10, "from testfile" )
+addBox(1,20,1, 10, "from testfile" )
 
-addMesh({{1,2,1},{8,8,8},{4,4,4}})
+addMesh({{1,2,1},{8,8,-8},{40,4,4},{-40,4,4},{-8,-8,-8},{-1,-12,4}})
 
 for k,v in pairs(getNodes()) do 	print(k,v) end
 

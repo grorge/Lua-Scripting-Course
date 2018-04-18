@@ -2,15 +2,17 @@
 
 
 Object::Object(irr::scene::ISceneNode * parent, irr::scene::ISceneManager * smgr, irr::s32 ID,
-	Vertex* verts, int nrOfPoint)
+	irr::core::array<irr::core::vector3df> verts)
 	: irr::scene::ISceneNode(parent, smgr, ID)
 {
 	this->mater.Wireframe = false;
 	this->mater.Lighting = false;
 
+	int nrOfPoint = verts.size();
+
 	for (int i = 0; i < nrOfPoint; i++)
 	{
-		this->verts[i] = irr::video::S3DVertex(verts[i].vertexes.X, verts[i].vertexes.Y, verts[i].vertexes.Z,
+		this->verts[i] = irr::video::S3DVertex(verts[i].X, verts[i].Y, verts[i].Z,
 			0, 0, 1, irr::video::SColor(255, 0, 255, 255), 0, 1);
 	}
 

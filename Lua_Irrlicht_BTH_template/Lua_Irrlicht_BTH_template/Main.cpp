@@ -49,77 +49,71 @@ static int l_addBox(lua_State *L) {
 	return 1;  /* number of results */
 }
 
+// Interpets the Lua into a vector for Irrlicht
 static int l_addMesh(lua_State *L) {
 
 	int nrOfTables = 0;
-	int hej = 0;
-	int isthis4 = 0;
 
-	int x0 = 0;
-	int y0 = 0;
-	int z0 = 0;
-
-	int x1 = 0;
-	int y1 = 0;
-	int z1 = 0;
-
-	int x2 = 0;
-	int y2 = 0;
-	int z2 = 0;
-
-	// ses the number of elements in stack
+	// sees the number of elements in stack
 	nrOfTables = lua_gettop(L);
+
+	irr::core::array<irr::core::vector3df> posVectors;
 
 	// It is one table on the stack
 	if (nrOfTables == 1 && lua_istable(L, 1))
 	{
-		// pushes the table on the first place in the table
-		isthis4 = lua_rawgeti(L, 1, 1);
-		if (lua_istable(L, -1) == 1)
+		// To hold the number of tablesadded
+		int nrOfPositions = 1;
+
+		// pushes first table in hte input table
+		lua_rawgeti(L, 1, nrOfPositions);
+		while (lua_istable(L, -1) == 1)
 		{
+			// createes the vector to hold the position
+			irr::core::vector3df vector;
+
 			nrOfTables = lua_gettop(L);
 			// pushes the first element in the table to the stack
-			isthis4 = lua_rawgeti(L, -1, 1);
+			lua_rawgeti(L, -1, 1);
 			// checks if its a number
-			hej = lua_isnumber(L, -1);
+			lua_isnumber(L, -1);
 			// adds the cumber to the x0 var
-			x0 = luaL_checknumber(L, -1);
+			vector.X = luaL_checknumber(L, -1);
 			// pops the element
 			lua_pop(L, 1);
-			nrOfTables = lua_gettop(L);
-		}
-		// Pops the table in the first place from the stack
-		lua_pop(L, 1);
 
-		// pushes the table on the second place in the table
-		isthis4 = lua_rawgeti(L, 1, 2);
-		if (lua_istable(L, -1) == 1)
-		{
-			isthis4 = lua_rawgeti(L, -1, 2);
-			nrOfTables = lua_gettop(L);
-			hej = lua_isnumber(L, -1);
-			lua_pop(L, 2);
+			// pushes the second element in the table to the stack
+			lua_rawgeti(L, -1, 2);
+			// checks if its a number
+			lua_isnumber(L, -1);
+			// adds the cumber to the x0 var
+			vector.Y = luaL_checknumber(L, -1);
+			// pops the element
+			lua_pop(L, 1);
+
+			// pushes the third element in the table to the stack
+			lua_rawgeti(L, -1, 3);
+			// checks if its a number
+			lua_isnumber(L, -1);
+			// adds the cumber to the x0 var
+			vector.Z = luaL_checknumber(L, -1);
+			// pops the element
+			lua_pop(L, 1);
+
+			posVectors.push_back(vector);
+
+			// Pops the table in the first place from the stack
+			lua_pop(L, 1);
+
+			nrOfPositions++;
+			// pushes the table on the first place in the table
+			lua_rawgeti(L, 1, nrOfPositions);
 		}
 
-		// pushes the table on the third place in the table
-		isthis4 = lua_rawgeti(L, 1, 3);
-		if (lua_istable(L, -1) == 1)
-		{
-			isthis4 = lua_rawgeti(L, -1, 2);
-			nrOfTables = lua_gettop(L);
-			hej = lua_isnumber(L, -1);
-			lua_pop(L, 2);
-		}
 	}
 	nrOfTables = lua_gettop(L);
 	
-	lua_pushnumber(L, 2);
-	isthis4 = lua_gettable(L, -2);
-
-
-
-
-	intf.addMesh({ x0, y0, z0 }, { x1, y1, z1 }, { x2, y2, z2 });
+	intf.addMesh(posVectors);
 	return 1;  /* number of results */
 }
 

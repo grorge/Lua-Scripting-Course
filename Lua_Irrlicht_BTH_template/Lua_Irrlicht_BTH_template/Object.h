@@ -22,7 +22,7 @@ class Object : public irr::scene::ISceneNode
 {
 public:
 	Object(irr::scene::ISceneNode* parent, irr::scene::ISceneManager* smgr, irr::s32 ID,
-		Vertex* verts, int nrOfPoints);
+		irr::core::array<irr::core::vector3df> verts);
 	~Object();
 
 	// All SceneNodes have thier checks if they are ready for rendering

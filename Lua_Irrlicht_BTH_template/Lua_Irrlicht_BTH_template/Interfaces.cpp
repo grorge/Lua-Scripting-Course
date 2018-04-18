@@ -38,21 +38,33 @@ Interface::~Interface()
 {
 }
 
-int Interface::addMesh(irr::core::vector3d<irr::s32> pos0, irr::core::vector3d<irr::s32> pos1, irr::core::vector3d<irr::s32> pos2)
+int Interface::addMesh(irr::core::array<irr::core::vector3df> posVectors)
 {
 	Object* testObj;
+	
+	int nrOfTriangles = 0;
 
-	Vertex verts[3] = {
-		Vertex(pos0.X, pos0.Y, pos0.Z),
-		Vertex(pos1.X, pos1.Y, pos1.Z),
-		Vertex(pos2.X, pos2.Y, pos2.Z)
-	};
+	irr::core::array<irr::core::vector3df> posVectorsPart;
 
-	testObj = new Object(this->smgr->getRootSceneNode(), this->smgr, this->IDs, verts, 3);
+	int totalTriangles = std::floor(posVectors.size() / 3);
 
-	this->nodes.push_back(testObj);
+	for (int i = 0; i < totalTriangles; i++)
+	{
+		posVectorsPart.push_back(posVectors[0 + nrOfTriangles]);
+		posVectorsPart.push_back(posVectors[1 + nrOfTriangles]);
+		posVectorsPart.push_back(posVectors[2 + nrOfTriangles]);
 
-	this->IDs++;
+		testObj = new Object(this->smgr->getRootSceneNode(), this->smgr, this->IDs, posVectorsPart);
+
+		this->nodes.push_back(testObj);
+
+		this->IDs++;
+
+		posVectorsPart.clear();
+		nrOfTriangles++;
+	}
+
+	
 	
 	return 1;
 }

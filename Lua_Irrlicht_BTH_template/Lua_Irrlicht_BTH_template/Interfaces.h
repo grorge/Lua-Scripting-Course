@@ -20,7 +20,7 @@ public:
 
 	int loadScene(std::string filename);
 
-	int addMesh(irr::core::vector3d<irr::s32> pos0, irr::core::vector3d<irr::s32> pos1, irr::core::vector3d<irr::s32> pos2);
+	int addMesh(irr::core::array<irr::core::vector3df> posVectors);
 	int updatepos(irr::core::vector3df pos);
 	int getpos();
 	int addBox(irr::core::vector3d<irr::s32> pos, int size);
