@@ -2,22 +2,25 @@ print("--Loading Testfile--")
 
 var = 4
 
-addBox(1,20,1, 10, "from testfile" )
+--for i=1,10 do 	addBox({i,i,i},1.0-i/11.0) end
+--for k,v in pairs(getNodes()) do for kk,vv in pairs(v) do print(k,kk,vv) end end
+--camera({-10,0,0},{0,2,0})
+--snapshot("test1.png")
+
+
+addBox({1,20,1}, 10, "from testfile" )
 
 addMesh({{1,2,1},{8,8,-8},{40,4,4},{-40,4,4},{-8,-8,-8},{-1,-12,4}})
+
+
+camera({-10,0,0},{0,2,0})
 
 for k,v in pairs(getNodes()) do 	print(k,v) end
 
 
-for i=1,0 do 
-	addBox({i,i,i},1.0-i/10.0) 
-end
+--for i=1,0 do 	addBox({i,i,i},1.0-i/10.0) end
 
-for k,v in pairs(getNodes()) do 
-	for kk,vv in pairs(v) do 
-		print(k,kk,vv) 
-	end 
-end
+-- for k,v in pairs(getNodes()) do 	for kk,vv in pairs(v) do 		print(k,kk,vv) 	end end
 
 
 

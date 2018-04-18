@@ -37,15 +37,61 @@ void ConsoleThread(lua_State* L) {
 
 
 static int l_addBox(lua_State *L) {
-	int x = luaL_checknumber(L, 1);
-	int y = luaL_checknumber(L, 2);
-	int z = luaL_checknumber(L, 3);
+	int nrOfTables = 0;
 
-	int s = luaL_checknumber(L, 4);
+	// sees the number of elements in stack
+	nrOfTables = lua_gettop(L);
 
-	std::string boxName = luaL_checkstring(L, 5);
+	// createes the vector to hold the position
+	irr::core::vector3df vector;
 
-	intf.addBox({ x, y, z }, s, boxName);
+	// It is one table on the stack
+	if (lua_istable(L, 1))
+	{
+
+		// pushes the first element in the table to the stack
+		lua_rawgeti(L, 1, 1);
+		// checks if its a number
+		lua_isnumber(L, -1);
+		// adds the cumber to the x0 var
+		vector.X = luaL_checknumber(L, -1);
+		// pops the element
+		lua_pop(L, 1);
+
+		// pushes the second element in the table to the stack
+		lua_rawgeti(L, 1, 2);
+		// checks if its a number
+		lua_isnumber(L, -1);
+		// adds the cumber to the x0 var
+		vector.Y = luaL_checknumber(L, -1);
+		// pops the element
+		lua_pop(L, 1);
+
+		// pushes the third element in the table to the stack
+		lua_rawgeti(L, 1, 3);
+		// checks if its a number
+		lua_isnumber(L, -1);
+		// adds the cumber to the x0 var
+		vector.Z = luaL_checknumber(L, -1);
+		// pops the element
+		lua_pop(L, 1);
+	}
+
+	
+
+	int s = luaL_checknumber(L, 2);
+
+	if (lua_isstring(L, 3))
+	{
+		std::string boxName = luaL_checkstring(L, 3);
+
+		intf.addBox({ vector.X, vector.Y, vector.Z }, s, boxName);
+	}
+	else
+	{
+		intf.addBox({ vector.X, vector.Y, vector.Z }, s);
+	}
+
 	return 1;  /* number of results */
 }
 
@@ -123,14 +169,76 @@ static int l_listNodes(lua_State *L) {
 }
 
 static int l_camera(lua_State *L) {
-	float x = luaL_checknumber(L, 1);
-	float y = luaL_checknumber(L, 2);
-	float z = luaL_checknumber(L, 3);
+	// createes the vector to hold the position
+	irr::core::vector3df vectorPos;
+	// createes the vector to hold the position
+	irr::core::vector3df vectorDest;
 
-	float tx = luaL_checknumber(L, 4);
-	float ty = luaL_checknumber(L, 5);
-	float tz = luaL_checknumber(L, 6);
-	intf.camera({ x, y, z }, { tx, ty, tz });
+	// It is one table on the stack
+	if (lua_istable(L, 1))
+	{
+
+		// pushes the first element in the table to the stack
+		lua_rawgeti(L, 1, 1);
+		// checks if its a number
+		lua_isnumber(L, -1);
+		// adds the cumber to the x0 var
+		vectorPos.X = luaL_checknumber(L, -1);
+		// pops the element
+		lua_pop(L, 1);
+
+		// pushes the second element in the table to the stack
+		lua_rawgeti(L, 1, 2);
+		// checks if its a number
+		lua_isnumber(L, -1);
+		// adds the cumber to the x0 var
+		vectorPos.Y = luaL_checknumber(L, -1);
+		// pops the element
+		lua_pop(L, 1);
+
+		// pushes the third element in the table to the stack
+		lua_rawgeti(L, 1, 3);
+		// checks if its a number
+		lua_isnumber(L, -1);
+		// adds the cumber to the x0 var
+		vectorPos.Z = luaL_checknumber(L, -1);
+		// pops the element
+		lua_pop(L, 1);
+	}
+	// It is one table on the stack
+	if (lua_istable(L, 2))
+	{
+
+		// pushes the first element in the table to the stack
+		lua_rawgeti(L, 2, 1);
+		// checks if its a number
+		lua_isnumber(L, -1);
+		// adds the cumber to the x0 var
+		vectorDest.X = luaL_checknumber(L, -1);
+		// pops the element
+		lua_pop(L, 1);
+
+		// pushes the second element in the table to the stack
+		lua_rawgeti(L, 2, 2);
+		// checks if its a number
+		lua_isnumber(L, -1);
+		// adds the cumber to the x0 var
+		vectorDest.Y = luaL_checknumber(L, -1);
+		// pops the element
+		lua_pop(L, 1);
+
+		// pushes the third element in the table to the stack
+		lua_rawgeti(L, 2, 3);
+		// checks if its a number
+		lua_isnumber(L, -1);
+		// adds the cumber to the x0 var
+		vectorDest.Z = luaL_checknumber(L, -1);
+		// pops the element
+		lua_pop(L, 1);
+	}
+
+
+	intf.camera(vectorPos, vectorDest);
 	return 1;  /* number of results */
 }
 
@@ -172,6 +280,11 @@ static int l_loadScene(lua_State *L) {
 		std::cout << lua_tostring(L, -1) << std::endl;
 	}
 	error = lua_pcall(L, 0, 0, 0);
+	if (error) {
+		/* If something went wrong, error message is at the top of */
+		/* the stack */
+		std::cout << lua_tostring(L, -1) << std::endl;
+	}
 
 	return intf.getpos();  /* number of results */
 }
@@ -229,8 +342,8 @@ int main()
 	//	Vertex(0, 20, 10)
 	//};
 
-	irr::core::vector3d<irr::s32> pos1 = { 20, -20, 10 };
-	irr::core::vector3d<irr::s32> pos2 = { -20, -20, 10 };
+	irr::core::vector3df pos1 = { 20, -20, 10 };
+	irr::core::vector3df pos2 = { -20, -20, 10 };
 
 	
 	intf.addBox(pos1, 5);
@@ -250,6 +363,11 @@ int main()
 		std::cout << lua_tostring(L, -1) << std::endl;
 	}
 	error = lua_pcall(L, 0, 0, 0);
+	if (error) {
+		/* If something went wrong, error message is at the top of */
+		/* the stack */
+		std::cout << lua_tostring(L, -1) << std::endl;
+	}
 
 	while(device->run()) {
 		driver->beginScene(true, true, irr::video::SColor(255, 90, 101, 140));

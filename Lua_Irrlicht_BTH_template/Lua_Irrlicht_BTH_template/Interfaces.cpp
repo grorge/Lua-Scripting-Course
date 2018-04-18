@@ -17,7 +17,7 @@ Interface::Interface(irr::video::IVideoDriver * driver, irr::scene::ISceneManage
 
 	this->IDs = 100;
 
-
+	/*
 	//Default modle for Labb 1
 	irr::scene::IAnimatedMesh* mesh = smgr->getMesh("../Meshes/sydney.md2");
 	irr::scene::IAnimatedMeshSceneNode* node = smgr->addAnimatedMeshSceneNode(mesh);
@@ -32,6 +32,7 @@ Interface::Interface(irr::video::IVideoDriver * driver, irr::scene::ISceneManage
 	this->nodes.push_back(node);
 
 	this->IDs++;
+	*/
 }
 
 Interface::~Interface()
@@ -97,14 +98,14 @@ int Interface::getpos()
 	return 1;
 }
 
-int Interface::addBox(irr::core::vector3d<irr::s32> pos, int size)
+int Interface::addBox(irr::core::vector3df pos, int size)
 {
 	std::string generatedName = "name" + std::to_string( this->IDs);
 	
 	return addBox(pos, size, generatedName);
 }
 
-int Interface::addBox(irr::core::vector3d<irr::s32> pos, int size, std::string name)
+int Interface::addBox(irr::core::vector3df pos, int size, std::string name)
 {
 	Vertex v[24] =
 	{
