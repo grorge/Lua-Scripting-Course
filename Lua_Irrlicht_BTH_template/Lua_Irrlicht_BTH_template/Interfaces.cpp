@@ -98,14 +98,14 @@ int Interface::getpos()
 	return 1;
 }
 
-int Interface::addBox(irr::core::vector3df pos, int size)
+int Interface::addBox(irr::core::vector3df pos, float size)
 {
 	std::string generatedName = "name" + std::to_string( this->IDs);
 	
 	return addBox(pos, size, generatedName);
 }
 
-int Interface::addBox(irr::core::vector3df pos, int size, std::string name)
+int Interface::addBox(irr::core::vector3df pos, float size, std::string name)
 {
 	Vertex v[24] =
 	{
@@ -166,22 +166,43 @@ int Interface::getNodes()
 
 	for (int i = 0; i < this->nodes.size(); i++)
 	{
+		lua_getglobal(this->L, "table");
+
+
+
+		lua_pushnumber(L, this->nodes[i]->getID());
+		lua_rawseti(this->L, -2, 1);
+
+		lua_gettop(L);
+
 		std::string name = "NaN mesh";
 		if (dynamic_cast<Box*>(this->nodes[i]))
 		{
 			name = dynamic_cast<Box*>(this->nodes[i])->getName();
 		}
 
-		returnTable = std::to_string( this->nodes[i]->getID()) + "	" + name 
-			+ "\n";
-		
-		//const char* toTable = returnTable.c_str();
+		lua_pushstring(L, name.c_str());
+		lua_rawseti(this->L, -2, 2);
 
-		// Pushes the number in the second arg to the top of hte stack
-		lua_pushstring(this->L, returnTable.c_str());
-		/* (lua_state - where is the stack the table is - where in the table the data is stored )*/
-		// The data is the data that 
-		lua_rawseti(this->L, -2, i+1);
+
+		std::string type = std::to_string(this->nodes[i]->getType());
+
+		lua_pushstring(L, type.c_str());
+		lua_rawseti(this->L, -2, 3);
+
+
+
+
+		//returnTable = std::to_string( this->nodes[i]->getID()) + "	" + name 
+		//	+ "\n";
+		//
+		////const char* toTable = returnTable.c_str();
+
+		//// Pushes the number in the second arg to the top of hte stack
+		//lua_pushstring(this->L, returnTable.c_str());
+		///* (lua_state - where is the stack the table is - where in the table the data is stored )*/
+		//// The data is the data that 
+		lua_rawseti(this->L, 1, i+1);
 	}
 
 

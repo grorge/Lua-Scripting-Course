@@ -23,8 +23,8 @@ public:
 	int addMesh(irr::core::array<irr::core::vector3df> posVectors);
 	int updatepos(irr::core::vector3df pos);
 	int getpos();
-	int addBox(irr::core::vector3df pos, int size);
-	int addBox(irr::core::vector3df pos, int size, std::string name);
+	int addBox(irr::core::vector3df pos, float size);
+	int addBox(irr::core::vector3df pos, float size, std::string name);
 
 	int getNodes();
 	int camera(irr::core::vector3df pos, irr::core::vector3df target);

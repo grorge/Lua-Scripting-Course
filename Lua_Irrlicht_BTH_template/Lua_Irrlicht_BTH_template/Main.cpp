@@ -37,22 +37,20 @@ void ConsoleThread(lua_State* L) {
 
 
 static int l_addBox(lua_State *L) {
-	int nrOfTables = 0;
-
-	// sees the number of elements in stack
-	nrOfTables = lua_gettop(L);
-
+	
+	int returnValue = 1;
+	
 	// createes the vector to hold the position
 	irr::core::vector3df vector;
-
-	// It is one table on the stack
-	if (lua_istable(L, 1))
+	
+	// check if its a table
+	if (lua_istable(L, 1) && lua_isnumber(L, 2))
 	{
-
+		int check = 0;
 		// pushes the first element in the table to the stack
 		lua_rawgeti(L, 1, 1);
 		// checks if its a number
-		lua_isnumber(L, -1);
+		check += lua_isnumber(L, -1);
 		// adds the cumber to the x0 var
 		vector.X = luaL_checknumber(L, -1);
 		// pops the element
@@ -61,7 +59,7 @@ static int l_addBox(lua_State *L) {
 		// pushes the second element in the table to the stack
 		lua_rawgeti(L, 1, 2);
 		// checks if its a number
-		lua_isnumber(L, -1);
+		check += lua_isnumber(L, -1);
 		// adds the cumber to the x0 var
 		vector.Y = luaL_checknumber(L, -1);
 		// pops the element
@@ -70,29 +68,42 @@ static int l_addBox(lua_State *L) {
 		// pushes the third element in the table to the stack
 		lua_rawgeti(L, 1, 3);
 		// checks if its a number
-		lua_isnumber(L, -1);
+		check += lua_isnumber(L, -1);
 		// adds the cumber to the x0 var
 		vector.Z = luaL_checknumber(L, -1);
 		// pops the element
 		lua_pop(L, 1);
-	}
 
-	
+		if (check == 3)
+		{
+			float s = luaL_checknumber(L, 2);
 
-	int s = luaL_checknumber(L, 2);
+			//check for a name
+			if (lua_isstring(L, 3))
+			{
+				std::string boxName = luaL_checkstring(L, 3);
 
-	if (lua_isstring(L, 3))
-	{
-		std::string boxName = luaL_checkstring(L, 3);
-
-		intf.addBox({ vector.X, vector.Y, vector.Z }, s, boxName);
+				returnValue = intf.addBox({ vector.X, vector.Y, vector.Z }, s, boxName);
+			}
+			else // no name case
+			{
+				returnValue = intf.addBox({ vector.X, vector.Y, vector.Z }, s);
+			}
+		}
+		else
+		{
+			// Not number in vector
+			// This is done by lua_checknumber()
+		}
 	}
 	else
 	{
-		intf.addBox({ vector.X, vector.Y, vector.Z }, s);
+		// wrong input
+		lua_pushstring(L, "wrong input");
 	}
 
-	return 1;  /* number of results */
+	
+	return returnValue;  /* number of results */
 }
 
 // Interpets the Lua into a vector for Irrlicht
@@ -103,11 +114,13 @@ static int l_addMesh(lua_State *L) {
 	// sees the number of elements in stack
 	nrOfTables = lua_gettop(L);
 
-	irr::core::array<irr::core::vector3df> posVectors;
 
 	// It is one table on the stack
 	if (nrOfTables == 1 && lua_istable(L, 1))
 	{
+		// Array with all the posints to draw
+		irr::core::array<irr::core::vector3df> posVectors;
+
 		// To hold the number of tablesadded
 		int nrOfPositions = 1;
 
@@ -156,10 +169,22 @@ static int l_addMesh(lua_State *L) {
 			lua_rawgeti(L, 1, nrOfPositions);
 		}
 
+		if (posVectors.size() % 3 > 0)
+		{
+			// post a mesage saying it will only draw in pairs of 3
+			// Not a crash
+		}
+
+
+		intf.addMesh(posVectors);
 	}
-	nrOfTables = lua_gettop(L);
+	else
+	{
+		// wrong in input
+			// first input is not a table
+			// not 1 argument on stack
+	}
 	
-	intf.addMesh(posVectors);
 	return 1;  /* number of results */
 }
 
@@ -332,7 +357,7 @@ int main()
 
 
 	// HARDCODED C WORLD
-	intf.camera(irr::core::vector3df(30, -20, -60), irr::core::vector3df(0, 0, 0));
+	//intf.camera(irr::core::vector3df(30, -20, -60), irr::core::vector3df(0, 0, 0));
 	
 	//bad vertex system
 	//Vertex vertexs[3] =
@@ -350,10 +375,24 @@ int main()
 	intf.addBox(pos2, 5);
 	//intf.addMesh(vertexs);
 
+	for (int i = 0; i < 10; i++)
+	{
+		//intf.addBox({(float)i, (float)i, (float)i}, i);
+	}
 
 
 
 	guienv->addStaticText(L"Hello World! This is the Irrlicht Software renderer!", irr::core::rect<irr::s32>(10, 10, 260, 22), true);
+
+	// Run the program once so the testfile can work preperly
+	driver->beginScene(true, true, irr::video::SColor(255, 90, 101, 140));
+
+
+	smgr->drawAll();
+	guienv->drawAll();
+
+	driver->endScene();
+
 
 	// Loads the lua testfile
 	int error = luaL_loadfile(L, "C:/Users/maxjo/Source/Repos/Lua-Scripting-Course/Lua_Irrlicht_BTH_template/Lua_Irrlicht_BTH_template/testfile.lua");
