@@ -95,21 +95,10 @@ void ConsoleThread(lua_State* L) {
 	while(GetConsoleWindow()) {
 		memset(command, 0, 1000);
 		std::cin.getline(command, 1000);
-		/*
-		Dessa två är de som laddar in commandot och sedan exekverar det som ligger överst på stacken
-		De kommer retunera 1 om de är fel
-		pcall(state. antal inparametrar . antal returvärde . index på stacken (där funktionen 
-			som ska hantera fel ligger )
-		Kan använda pcall för att 
-		*/
 		if (luaL_loadstring(L, command) || lua_pcall(L, 0, 0, 0))
 		{
-			// Hämtar en sträng från stacken med index -1 som är överst i stacken
-			// ett felmedelande är alltid en sträng
 			std::cout << lua_tostring(L, -1) << '\n';
 
-			// Felmedelandet ligger kvar på stacken det måste tas bort för att inte få minnesläckor
-			// det kan också ge fel när man jobbar med stacken ifall den inte är tom
 			lua_pop(L, 1);
 		}
 
@@ -159,17 +148,7 @@ static int l_getpos(lua_State *L) {
 
 int main()
 {
-	/* 
-	Ett lua state som skapar ma ne nLua miljö
-	Skickar med statet när man binder funtioner och kan använda dessa i Lua commanden
-	Varje state har en egen stack
-	*/
 	lua_State* L = luaL_newstate();
-
-	/*
-	LuaL är för att hjälpa till med kom mellan C och Lua
-	Det är inte en starndarn interperter
-	*/
 	luaL_openlibs(L);
 
 
@@ -251,60 +230,3 @@ int main()
 	return 0;
 }
 
-
-/*
------- FAKTA
----Globals
-Alla variabler blir globala när man skriver .lua kod
-
-När man skriver .lua så kan man deklarera variabler som kan hämtas med getglobal
-Men dess kommer inte att hamna i stacken förän vi använder getglobal
-
-
----Tabeller
-Tabbeller kommer att kunna deklarerars 
-
-För att hämta ett värde: 
-	* hämtar man först tabbellen men getglobal()
-	* sen hämtar ett indexerat värde genom att:
-		- pusha ett index med lua_pushstring() eller 
-		- sedan köra lua_gettable() med sIndex som tabellen ligger på
-Notera att hämt atabellen görs inte av gettable för den är en global och använder sig därför av getglobal
-	
----Funktioner i Lua som hanteras av C++
-getgloblan för att hämta
-Sedan pusha alla argument i samma ordning
-sedan göra pcall med antalaet inparametrar
-return läggs i stacken i den ordning som de skrivs ut.
-	Ex: return hej, hejdå, tjabba
-		-1: tjabba	:3
-		-2: hejdå	:2
-		-3: hej		:1
-
-
----Closure
-Man kan göra det som står i ---Funktioner med Closures istället
-Läs på om lua_pushcclosure
-
-
-
------- FUNKTIONER
-
-lua_is*  
-	kollar om ett värde är korrekt
-
-lua_getglobal 
-	hämtar den global variablen som har samma namn som arg
-	lägger det elementet på stacken
-
-lua_setglobal 
-	sätter ett det som ligger på stacken till en variable med namnet i arg
-
-lua_pushcclosure
-	har argumen:
-		- state
-		- pekare till funktionen
-		- minnesalokering????
-
-
-*/
