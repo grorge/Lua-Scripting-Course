@@ -117,12 +117,35 @@ int main()
 	CharClass digit("0123456789");
 	CharClass nonzero("123456789");
 	CharClass hex("0123456789abcdefABCDEF");
+	//[a-zA-Z]
 	CharClass string("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
 	CharClass dot(".");
 	CharClass comma(",");
 	CharClass semi(";");
 	CharClass startT("{");
 	CharClass endT("}");
+	CharClass squBstr("[");
+	CharClass squBend("]");
+
+	//([0-9]*[a-zA-Z]*)*
+	Seq alphaKey({ 
+		//&string ,
+		new Star(&digit) , 
+		new Star(&string) 
+	});
+	Star alphaKeyStar(
+		new Seq({ 
+			new Star(&digit) , 
+			new Star(&string) 
+		})
+	);
+
+	// ["["]([0-9]*[a-zA-Z]*)*["]"]
+	Seq bracetKey({
+		&squBstr,
+		&alphaKey,
+		&squBend
+		});
 
 	// ([1-9][0-9]*)[.][0-9]*
 	Seq number({ 
@@ -131,15 +154,18 @@ int main()
 		new Star(&digit)
 	});
 
-	std::cout << "RegEx TEST:\n" << 
+	std::cout << "RegEx TEST:\n";
 		
-		digit.match("3")	<< std::endl <<
-		number.match("3124.235")	<< std::endl <<
-		number.match(".235") << std::endl <<
-		number.match("3124235") << std::endl <<
-		number.match("3124.") << std::endl <<
+		std::cout << digit.match("3")	<< std::endl;
+		std::cout << number.match("3124.235")	<< std::endl;
+
+		// Varför tillåter denna att får nåt som inte hör till
+		// Hur ser man till att den blir arg om något inte finns i något av fälten
+		// Den kommer att godkänna om något i strängen är godkännt
+		std::cout << alphaKey.match("3124.235") << std::endl;
+		std::cout << alphaKey.match("sadg78hadh97ah") << std::endl;
 		
-		"END OF TEST" << std::endl;
+	std::cout << "END OF TEST" << std::endl;
 
 	// Error blir 7 och sen 2 ????????????????????????????????????
 	int error = luaL_loadfile(L, "../testfile.lua");
