@@ -12,6 +12,7 @@
 #include <list>
 
 #include "Interfaces.h"
+#include "Regex.h"
 
 class Tree
 {
@@ -28,67 +29,7 @@ public:
 	}
 };
 
-class Regex
-{
-public:
-	virtual int match(char const *)
-		= 0;
-};
-class CharClass : public Regex
-{
-public:
-	std::string contents;
-	virtual int match(char const *text);
-	CharClass(std::string c) :
-		contents(c) {}
-};
-int CharClass::match(char const *text)
-{
-	return contents.find(*text) == std::string::npos ? -1 : 1;
-}
 
-class Star : public Regex
-{
-public:
-	std::string contents;
-	Regex* operand;
-	virtual int match(char const *text);
-	Star(Regex* c) :
-		operand(c) {}
-};
-int Star::match(char const *text)
-{
-	int n, consumed = 0;
-	while ((n = operand->match(text)) > 0)
-	{
-		consumed += n;
-		text += n;
-	}
-	return consumed;
-}
-
-class Seq : public Regex
-{
-public:
-	// std::string contents;
-	std::list<Regex*> cells;
-	virtual int match(char const *text);
-	Seq(std::list<Regex*> c) :
-		cells(c) {}
-};
-int Seq::match(char const *text)
-{
-	int chars, consumed = 0;
-	for (auto c : cells) {
-		if ((chars = c->match(text)) < 0)
-		{
-			return -1;
-		}
-		consumed += chars;
-		text += chars;
-	}
-	return consumed;
-}
 
 // Global interface to call functions from the Lua terminal
 Interface intf;
@@ -108,6 +49,11 @@ void ConsoleThread(lua_State* L) {
 	}
 }
 
+void testRegex(Regex* reg, const char* text)
+{
+	std::string str = text;
+	std::cout << text << ": " << reg->match(text) << "/" << str.length() << std::endl;
+}
 
 int main()
 {
@@ -128,22 +74,18 @@ int main()
 	CharClass squBend("]");
 
 	//([0-9]*[a-zA-Z]*)*
-	Seq alphaKey({ 
-		//&string ,
-		new Star(&digit) , 
-		new Star(&string) 
-	});
 	Star alphaKeyStar(
-		new Seq({ 
-			new Star(&digit) , 
-			new Star(&string) 
+		new Seq({
+			new Star(&digit) ,
+			new Star(&string)
 		})
+
 	);
 
 	// ["["]([0-9]*[a-zA-Z]*)*["]"]
 	Seq bracetKey({
 		&squBstr,
-		&alphaKey,
+		&alphaKeyStar,
 		&squBend
 		});
 
@@ -157,13 +99,11 @@ int main()
 	std::cout << "RegEx TEST:\n";
 		
 		std::cout << digit.match("3")	<< std::endl;
-		std::cout << number.match("3124.235")	<< std::endl;
+		testRegex(&number, "3124.235");
 
-		// Varför tillåter denna att får nåt som inte hör till
-		// Hur ser man till att den blir arg om något inte finns i något av fälten
-		// Den kommer att godkänna om något i strängen är godkännt
-		std::cout << alphaKey.match("3124.235") << std::endl;
-		std::cout << alphaKey.match("sadg78hadh97ah") << std::endl;
+		testRegex(&alphaKeyStar, "3124.235");
+		testRegex(&alphaKeyStar, "fjaygfbsaf632uar2174g4");
+		testRegex(&bracetKey, "[asgdsdakgsdagsadgsadghelia213af1]");
 		
 	std::cout << "END OF TEST" << std::endl;
 

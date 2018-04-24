@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClInclude Include="Interfaces.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="Regex.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="testfile.lua" />
