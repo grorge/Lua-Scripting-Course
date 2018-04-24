@@ -53,8 +53,8 @@ public:
 	std::string contents;
 	Regex* operand;
 	virtual int match(char const *text);
-	Star(std::string c) :
-		contents(c) {}
+	Star(Regex* c) :
+		operand(c) {}
 };
 int Star::match(char const *text)
 {
@@ -70,17 +70,20 @@ int Star::match(char const *text)
 class Seq : public Regex
 {
 public:
-	std::string contents;
+	// std::string contents;
 	std::list<Regex*> cells;
 	virtual int match(char const *text);
-	Seq(std::string c) :
-		contents(c) {}
+	Seq(std::list<Regex*> c) :
+		cells(c) {}
 };
 int Seq::match(char const *text)
 {
 	int chars, consumed = 0;
 	for (auto c : cells) {
-		if ((chars = c->match(text)) < 0) return -1;
+		if ((chars = c->match(text)) < 0)
+		{
+			return -1;
+		}
 		consumed += chars;
 		text += chars;
 	}
@@ -106,51 +109,37 @@ void ConsoleThread(lua_State* L) {
 }
 
 
-static int l_addBox(lua_State *L) {
-	int x = luaL_checknumber(L, 1);
-	int y = luaL_checknumber(L, 2);
-	int z = luaL_checknumber(L, 3);
-	intf.addBox({ x, y, z }, 5);
-	return 1;  /* number of results */
-}
-
-static int l_listNodes(lua_State *L) {
-	std::cout << intf.getNodes();
-	return 1;  /* number of results */
-}
-
-static int l_camera(lua_State *L) {
-	float x = luaL_checknumber(L, 1);
-	float y = luaL_checknumber(L, 2);
-	float z = luaL_checknumber(L, 3);
-
-	//int tx = luaL_checknumber(L, 4);
-	//int ty = luaL_checknumber(L, 5);
-	//int tz = luaL_checknumber(L, 6);
-	intf.camera({ x, y, z }, { 0, 0, 0 });
-	return 1;  /* number of results */
-}
-
-static int l_updatepos(lua_State *L) {
-	float x = luaL_checknumber(L, 1);
-	float y = luaL_checknumber(L, 2);
-	float z = luaL_checknumber(L, 3);
-
-	intf.updatepos({ x, y, z });
-	return 0;  /* number of results */
-}
-
-static int l_getpos(lua_State *L) {
-
-	//intf.getpos();
-	return intf.getpos();  /* number of results */
-}
-
 int main()
 {
 	lua_State* L = luaL_newstate();
 	luaL_openlibs(L);
 
+	CharClass digit("0123456789");
+	CharClass nonzero("123456789");
+	CharClass hex("0123456789abcdefABCDEF");
+	CharClass string("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+	CharClass dot(".");
+	CharClass comma(",");
+	CharClass semi(";");
+	CharClass startT("{");
+	CharClass endT("}");
+
+	// ([1-9][0-9]*)[.][0-9]*
+	Seq number({ 
+		new Seq({&nonzero, new Star(&digit) }), 
+		&dot, 
+		new Star(&digit)
+	});
+
+	std::cout << "RegEx TEST:\n" << 
+		
+		digit.match("3")	<< std::endl <<
+		number.match("3124.235")	<< std::endl <<
+		number.match(".235") << std::endl <<
+		number.match("3124235") << std::endl <<
+		number.match("3124.") << std::endl <<
+		
+		"END OF TEST" << std::endl;
 
 	// Error blir 7 och sen 2 ????????????????????????????????????
 	int error = luaL_loadfile(L, "../testfile.lua");
@@ -171,43 +160,12 @@ int main()
 
 	intf = Interface(driver, smgr, guienv, L);
 
-	// BINDING CFUNCTIONS TO LUA CALLS
-	/*
-	pushar en pekare til funktionen till stacken
-	sen sätter addBox som en global i Lua som binder den till det som ligger överst i stacken
-	*/
-	lua_pushcfunction(L, l_addBox);
-	lua_setglobal(L, "addBox");
-	lua_pushcfunction(L, l_listNodes);
-	lua_setglobal(L, "listNodes");
-	lua_pushcfunction(L, l_camera);
-	lua_setglobal(L, "camera");
-
-	lua_pushcfunction(L, l_updatepos);
-	lua_setglobal(L, "updatepos");
-	lua_pushcfunction(L, l_getpos);
-	lua_setglobal(L, "getpos");
-
 
 
 	// HARDCODED C WORLD
 	intf.camera(irr::core::vector3df(30, -20, -60), irr::core::vector3df(0, 0, 0));
 	
-	//bad vertex system
-	Vertex vertexs[3] =
-	{ 
-		Vertex(20, -20, 10) ,
-		Vertex(-20, -20, 10) , 
-		Vertex(0, 20, 10)
-	};
 
-	irr::core::vector3d<irr::s32> pos1 = { 20, -20, 10 };
-	irr::core::vector3d<irr::s32> pos2 = { -20, -20, 10 };
-
-	
-	intf.addBox(pos1, 5);
-	intf.addBox(pos2, 5);
-	intf.addMesh(vertexs);
 
 
 
