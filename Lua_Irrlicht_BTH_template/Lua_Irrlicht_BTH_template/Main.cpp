@@ -55,6 +55,22 @@ void testRegex(Regex* reg, const char* text)
 	std::cout << text << ": " << reg->match(text) << "/" << str.length() << std::endl;
 }
 
+bool checkString(const char* text);
+
+bool isTable(const char* text);
+
+bool isValue(const char* text);
+
+bool isBracet(const char* text);
+
+bool isString(const char* text);
+
+bool isVarible(const char* text);
+
+bool isDigit(const char* text);
+
+
+
 int main()
 {
 	lua_State* L = luaL_newstate();
@@ -64,10 +80,12 @@ int main()
 	CharClass nonzero("123456789");
 	CharClass hex("0123456789abcdefABCDEF");
 	//[a-zA-Z]
-	CharClass string("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+	CharClass chars("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+	CharClass alpha("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
 	CharClass dot(".");
 	CharClass comma(",");
 	CharClass semi(";");
+	CharClass commasemi(",;");
 	CharClass startT("{");
 	CharClass endT("}");
 	CharClass squBstr("[");
@@ -75,19 +93,34 @@ int main()
 
 	//([0-9]*[a-zA-Z]*)*
 	Star alphaKeyStar(
-		new Seq({
-			new Star(&digit) ,
-			new Star(&string)
-		})
-
+		&alpha
 	);
+	Seq stringAlpha({
+		new CharClass("\""),
+		&alphaKeyStar,
+		new CharClass("\"")
+	});
+
+	// (0x)[0-9a-fA-F]*
+	Seq	hexLiteral({
+		new Seq({
+			new CharClass("0"),
+			new CharClass("x")
+		}),
+		new Star( &hex)
+	});
 
 	// ["["]([0-9]*[a-zA-Z]*)*["]"]
 	Seq bracetKey({
 		&squBstr,
 		&alphaKeyStar,
 		&squBend
-		});
+	});
+	Seq bracetString({
+		&squBstr,
+		&stringAlpha,
+		&squBend
+	});
 
 	// ([1-9][0-9]*)[.][0-9]*
 	Seq number({ 
@@ -96,16 +129,85 @@ int main()
 		new Star(&digit)
 	});
 
-	std::cout << "RegEx TEST:\n";
-		
-		std::cout << digit.match("3")	<< std::endl;
-		testRegex(&number, "3124.235");
+	Seq table({});
 
+	// (alphakey)*(table)*(bracetKey)*
+	Seq value({
+		&alphaKeyStar,
+		new Star(&table),
+		new Star(&bracetKey),
+		new Star(&bracetString),
+		new Star(&stringAlpha)
+	});
+
+	Seq valueNoneDigit({
+		new Star(&chars),
+		new Star(&table),
+		new Star(&bracetKey),
+		new Star(&bracetString),
+		new Star(&stringAlpha)
+		});
+
+	Seq declare({
+		&valueNoneDigit,
+		new CharClass("="),
+		&value
+	});
+
+
+	
+
+	// value=value
+	Seq field({
+		new Star(&value),
+		new Star(&declare)
+	});
+
+	table = Seq({
+		&startT,
+		new Star(&field),
+		&endT
+	});
+
+	std::cout << "RegEx TEST:\n\n";
+		
+		std::cout << "--AplhaKey:\n";
 		testRegex(&alphaKeyStar, "3124.235");
 		testRegex(&alphaKeyStar, "fjaygfbsaf632uar2174g4");
-		testRegex(&bracetKey, "[asgdsdakgsdagsadgsadghelia213af1]");
+
 		
-	std::cout << "END OF TEST" << std::endl;
+		std::cout << "--Bracket:\n";
+		testRegex(&bracetKey, "[asgdsdakgsdagsadgsadghelia213af1]");
+
+
+		std::cout << "--Hex:\n";
+		testRegex(&hexLiteral, "0x1");
+		testRegex(&hexLiteral, "0xfed");
+		testRegex(&hexLiteral, "0xCBA9");
+		testRegex(&hexLiteral, "0x00000000");
+		
+		testRegex(&hexLiteral, "12ef");
+		testRegex(&hexLiteral, "0y7");		
+		testRegex(&hexLiteral, "0xG900");		
+
+
+		std::cout << "--Tables:\n";
+		testRegex(&table, "{}");
+		testRegex(&table, "{1,2;3}");
+		testRegex(&table, "{1,2;3,}");
+		testRegex(&table, "{easyas=\"abc\";2;2,[\"hello\"]=\"world\",[3]=4}");
+		testRegex(&table, "{{1,2,3},data={0x77}}");
+
+		testRegex(&table, "{{}");
+		testRegex(&table, "{;}");
+		testRegex(&table, "{1,,}");
+		testRegex(&table, "{34=7}");
+		testRegex(&table, "{alpha=beta=gamma}");
+
+		isTable("{{1,2,3},data={0x77}}");
+
+
+	std::cout << "\nEND OF TEST\n" << std::endl;
 
 	// Error blir 7 och sen 2 ????????????????????????????????????
 	int error = luaL_loadfile(L, "../testfile.lua");
@@ -154,3 +256,194 @@ int main()
 	return 0;
 }
 
+
+
+bool checkString(const char* text)
+{
+
+	Regex* table1;
+	Regex* table2;
+	Regex* value;
+	Regex* declare;
+	Regex* semicomma;
+	Regex* none;
+	Regex* bracet;
+	Regex* table3;
+	Regex* character;
+	Regex* string;
+	Regex* digit;
+
+	std::string str(text);
+
+	// Is it a table?
+	if (isTable(text))
+	{
+		// Remove wings
+		str.pop_back();
+		str.erase(0, 1);;
+
+
+
+
+
+	}
+
+
+
+
+	// Is it a value?
+
+
+	//std::list<Regex*> tempList;
+	//int traversed = 0;
+
+	//// Put together table2 return -1 if it fails
+	//bool succses = false;
+	//// case value
+	//if ((traversed = value->match(str)) > 0)
+	//{
+	//	tempList.push_back(value);
+	//	succses = true;
+	//} // case declration
+	//else if ((traversed = declare->match(str)) > 0)
+	//{
+	//	tempList.push_back(declare);
+	//	succses = true;
+	//	
+	//} // case table1
+	//else if ((traversed = table1->match(str)) > 0)
+	//{
+	//	tempList.push_back(table1);
+	//	succses = true;
+	//}
+
+	//if (succses)
+	//{
+	//	if (semicomma->match(str) > 0)
+	//	{
+	//		tempList.push_back(semicomma);
+	//	}
+	//	else if (none->match(str) > 0)
+	//	{
+	//		tempList.push_back(none);
+	//	}
+	//	else
+	//	{
+	//		return -1;
+	//	}
+	//}
+	//else
+	//{
+	//	return -1;
+	//}
+
+	//// Table är nu en som kan göra match för att validera 
+	//table2 = new Seq(tempList);
+
+	return true;
+}
+
+bool isTable(const char* text)
+{
+	std::string str(text);
+	bool retValue = false;
+
+	if (str.find_first_of("{") == 0 && str.find_last_of("}") == str.length() - 1)
+	{
+		retValue = true/*checkString(str.c_str())*/;
+	}
+
+	return retValue;
+}
+
+bool isValue(const char* text)
+{
+	std::string str(text);
+	bool retValue = false;
+
+	if (isBracet(text) || isString(text) || isDigit(text) || isVarible(text))
+	{
+		retValue = true;
+	}
+
+	return retValue;
+}
+
+bool isBracet(const char* text)
+{
+	std::string str(text);
+	bool retValue = false;
+
+	if (str.find_first_of("[") == 0 && str.find_last_of("]") == str.length() - 1)
+	{
+		// Remove wings
+		str.pop_back();
+		str.erase(0, 1);;
+
+		if (isString(str.c_str()) || isDigit(str.c_str()))
+		{
+			retValue = true/*checkString(str.c_str())*/;
+		}
+	}
+
+
+	return retValue;
+}
+
+bool isString(const char* text)
+{
+	std::string str(text);
+	bool retValue = false;
+
+
+	if (str.find_first_of("\"") == 0 && str.find_last_of("\"") == str.length() - 1)
+	{
+		// Remove wings
+		str.pop_back();
+		str.erase(0, 1);;
+
+
+		if (str.find("\"") == str.npos)
+		{
+			retValue = true/*checkString(str.c_str())*/;
+		}
+
+		retValue = true/*checkString(str.c_str())*/;
+	}
+
+	return retValue;
+}
+
+bool isVarible(const char* text)
+{
+	std::string str(text);
+	bool retValue = false;
+	
+	CharClass alpha("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+
+	Star key(&alpha);
+
+	if (key.match(text) == str.length())
+	{
+		retValue = true;
+	}
+
+	return retValue;
+}
+
+bool isDigit(const char* text)
+{
+	std::string str(text);
+	bool retValue = false;
+
+	CharClass digit("0123456789");
+
+	Star key(&digit);
+
+	if (key.match(text) == str.length())
+	{
+		retValue = true;
+	}
+
+	return retValue;
+}
