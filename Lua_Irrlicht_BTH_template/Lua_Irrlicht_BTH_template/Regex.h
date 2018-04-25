@@ -84,6 +84,10 @@ DECLARE: (VARIBLE | BRACET) "=" (TABLE3 | TABLE1)
 
 ----------------------------------------------------------
 
+		"{{1,2,3},data={0x77}}"
+
+
+
 	Kanske ska plocka ut element och kolla dem för vad de är istället
 
 	Kan kolla hela tabbellen om den är godkännd först

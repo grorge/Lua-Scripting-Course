@@ -55,9 +55,11 @@ void testRegex(Regex* reg, const char* text)
 	std::cout << text << ": " << reg->match(text) << "/" << str.length() << std::endl;
 }
 
-bool checkString(const char* text);
+//bool checkString(const char* text);
 
 bool isTable(const char* text);
+
+bool isElem(const char* text);
 
 bool isValue(const char* text);
 
@@ -68,6 +70,10 @@ bool isString(const char* text);
 bool isVarible(const char* text);
 
 bool isDigit(const char* text);
+
+bool isHex(const char* text);
+
+bool isDeclare(const char* text);
 
 
 
@@ -192,24 +198,24 @@ int main()
 
 
 		std::cout << "--Tables:\n";
-		testRegex(&table, "{}");
-		testRegex(&table, "{1,2;3}");
-		testRegex(&table, "{1,2;3,}");
-		testRegex(&table, "{easyas=\"abc\";2;2,[\"hello\"]=\"world\",[3]=4}");
-		testRegex(&table, "{{1,2,3},data={0x77}}");
-
-		testRegex(&table, "{{}");
-		testRegex(&table, "{;}");
-		testRegex(&table, "{1,,}");
-		testRegex(&table, "{34=7}");
-		testRegex(&table, "{alpha=beta=gamma}");
-
+		isTable("{}");
+		isTable("{1,2;3}");
+		isTable("{1,2;3,}");
+		isTable("{easyas=\"abc\";2;2,[\"hello\"]=\"world\",[3]=4}");
 		isTable("{{1,2,3},data={0x77}}");
 
+		isTable("{{}");
+		isTable("{;}");
+		isTable("{1,,}");
+		isTable("{34=7}");
+		isTable("{alpha=beta=gamma}");
+
+		isTable("{{1,2,3},data={0x77}}");
+		isDeclare("hej=afsaf");
 
 	std::cout << "\nEND OF TEST\n" << std::endl;
 
-	// Error blir 7 och sen 2 ????????????????????????????????????
+
 	int error = luaL_loadfile(L, "../testfile.lua");
 	error = lua_pcall(L, 0, 0, 0);
 
@@ -234,16 +240,11 @@ int main()
 	intf.camera(irr::core::vector3df(30, -20, -60), irr::core::vector3df(0, 0, 0));
 	
 
-
-
-
-
 	guienv->addStaticText(L"Hello World! This is the Irrlicht Software renderer!", irr::core::rect<irr::s32>(10, 10, 260, 22), true);
 
 	while(device->run()) {
 		driver->beginScene(true, true, irr::video::SColor(255, 90, 101, 140));
-
-
+		
 		smgr->drawAll();
 		guienv->drawAll();
 
@@ -256,93 +257,6 @@ int main()
 	return 0;
 }
 
-
-
-bool checkString(const char* text)
-{
-
-	Regex* table1;
-	Regex* table2;
-	Regex* value;
-	Regex* declare;
-	Regex* semicomma;
-	Regex* none;
-	Regex* bracet;
-	Regex* table3;
-	Regex* character;
-	Regex* string;
-	Regex* digit;
-
-	std::string str(text);
-
-	// Is it a table?
-	if (isTable(text))
-	{
-		// Remove wings
-		str.pop_back();
-		str.erase(0, 1);;
-
-
-
-
-
-	}
-
-
-
-
-	// Is it a value?
-
-
-	//std::list<Regex*> tempList;
-	//int traversed = 0;
-
-	//// Put together table2 return -1 if it fails
-	//bool succses = false;
-	//// case value
-	//if ((traversed = value->match(str)) > 0)
-	//{
-	//	tempList.push_back(value);
-	//	succses = true;
-	//} // case declration
-	//else if ((traversed = declare->match(str)) > 0)
-	//{
-	//	tempList.push_back(declare);
-	//	succses = true;
-	//	
-	//} // case table1
-	//else if ((traversed = table1->match(str)) > 0)
-	//{
-	//	tempList.push_back(table1);
-	//	succses = true;
-	//}
-
-	//if (succses)
-	//{
-	//	if (semicomma->match(str) > 0)
-	//	{
-	//		tempList.push_back(semicomma);
-	//	}
-	//	else if (none->match(str) > 0)
-	//	{
-	//		tempList.push_back(none);
-	//	}
-	//	else
-	//	{
-	//		return -1;
-	//	}
-	//}
-	//else
-	//{
-	//	return -1;
-	//}
-
-	//// Table är nu en som kan göra match för att validera 
-	//table2 = new Seq(tempList);
-
-	return true;
-}
-
 bool isTable(const char* text)
 {
 	std::string str(text);
@@ -350,7 +264,101 @@ bool isTable(const char* text)
 
 	if (str.find_first_of("{") == 0 && str.find_last_of("}") == str.length() - 1)
 	{
-		retValue = true/*checkString(str.c_str())*/;
+		// Remove wings
+		str.pop_back();
+		str.erase(0, 1);
+
+		retValue = true;
+		int lastComma = 0;
+		int i = 0;
+		int tabStrted = 0;
+		while (i < str.length())
+		{
+			if (str[i] == '{')
+			{
+				tabStrted++;
+			}
+			else if (str[i] == '}')
+			{
+				tabStrted--;
+			}
+			else if (tabStrted == 0)
+			{
+				if ((str[i] == ',' || str[i] == ';')/* && i != lastComma + 1*/)
+				{
+					// Found a element
+					std::string element(str);
+
+
+					element.erase(i, str.length());
+					if (lastComma > 0)
+					{
+						element.erase(0, lastComma+1);
+					}
+					
+
+
+					if (!isElem(element.c_str()))
+					{
+						retValue = false;
+					}
+						
+					lastComma = i;
+
+
+				}
+				else if (i + 1 == str.length())
+				{
+					i++;
+
+					// Found a element
+					std::string element(str);
+
+
+					element.erase(i, str.length());
+					if (lastComma > 0)
+					{
+						element.erase(0, lastComma + 1);
+					}
+
+
+
+					if (!isElem(element.c_str()))
+					{
+						retValue = false;
+					}
+
+				}
+			}
+
+
+			i++;
+		}
+
+		if (tabStrted != 0)
+		{
+			retValue = false;
+		}
+
+		//retValue = true;//checkString(str.c_str());
+	}
+
+	return retValue;
+}
+
+bool isElem(const char * text)
+{
+	std::string str(text);
+	bool retValue = false;
+
+	if (isValue(text) || isDeclare(text) || isHex(text) || isTable(text))
+	{
+		retValue = true;
+	}
+
+	if (str == "")
+	{
+		retValue = false;
 	}
 
 	return retValue;
@@ -419,11 +427,15 @@ bool isVarible(const char* text)
 	std::string str(text);
 	bool retValue = false;
 	
+	CharClass letter("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
 	CharClass alpha("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
-	Star key(&alpha);
+	Seq startOnLetter({
+		&letter,
+		new Star(&alpha)
+		});
 
-	if (key.match(text) == str.length())
+	if (startOnLetter.match(text) == str.length())
 	{
 		retValue = true;
 	}
@@ -444,6 +456,59 @@ bool isDigit(const char* text)
 	{
 		retValue = true;
 	}
+
+	return retValue;
+}
+
+bool isHex(const char * text)
+{
+	std::string str(text);
+	bool retValue = false;
+
+	CharClass digit("0123456789");
+
+	Seq	key({
+		new Seq({
+			new CharClass("0"),
+			new CharClass("x")
+			}),
+		new Star(new CharClass("0123456789abcdefABCDEF"))
+		});
+
+	if (key.match(text) == str.length())
+	{
+		retValue = true;
+	}
+
+	return retValue;
+}
+
+bool isDeclare(const char * text)
+{
+	std::string str(text);
+	bool retValue = false;
+
+	int n = str.find_first_of("=");
+	// only 1 =
+	if (n == str.find_last_of("=") && n != -1)
+	{
+		std::string firstHalf(text);
+		std::string secondHalf(text);
+
+		firstHalf.erase(n,str.length());
+		secondHalf.erase(0, n + 1);
+
+		if (
+			(isBracet(firstHalf.c_str()) || isString(firstHalf.c_str()) || /*isDigit(firstHalf.c_str()) || */isVarible(firstHalf.c_str()))
+			&& 
+			(isString(secondHalf.c_str()) || isDigit(secondHalf.c_str()) || isTable(secondHalf.c_str()) || isVarible(secondHalf.c_str()))
+			)
+		{
+			retValue = true;
+		}
+	}
+
+	
 
 	return retValue;
 }
