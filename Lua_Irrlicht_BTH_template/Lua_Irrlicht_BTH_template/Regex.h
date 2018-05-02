@@ -68,29 +68,3 @@ int Seq::match(char const *text)
 
 #endif // !REGEX_H
 
-
-/*
-TABLE1: "{" TABLE2 "}"
-
-TABLE2: (VALUE | DECLARE | TABLE1) (SEMICOMMA | NONE)
-
-VALUE: BRACET | TABLE3 | VARIBLE
-
-BRACET: "[" TABLE3 "]"
-
-TABLE3: STRING | DIGIT
-
-DECLARE: (VARIBLE | BRACET) "=" (TABLE3 | TABLE1)
-
-----------------------------------------------------------
-
-		"{{1,2,3},data={0x77}}"
-
-
-
-	Kanske ska plocka ut element och kolla dem för vad de är istället
-
-	Kan kolla hela tabbellen om den är godkännd först
-		gör det genom att kolla en jättesimple field
-
-*/

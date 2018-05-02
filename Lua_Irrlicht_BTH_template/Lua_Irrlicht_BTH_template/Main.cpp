@@ -14,18 +14,45 @@
 #include "Interfaces.h"
 #include "Regex.h"
 
+
+/*
+					---RULES---
+
+TABLE: "{" TABLE2* "}"
+
+TABLE2: ELEMENT (SEMICOMMA | LAST)
+
+ELEMENT: VALUE | DECLARE | TABLE1
+
+VALUE: BRACET | TABLE3 | VARIBLE
+
+BRACET: "[" TABLE3 "]"
+
+TABLE3: STRING | DIGIT
+
+DECLARE: (VARIBLE | BRACET) "=" (TABLE3 | TABLE1)
+*/
+
 class Tree
 {
 public:
 	std::string       lexeme, tag;
 	std::list<Tree*> children;
-	Tree(std::string t, char *l, int size)
+	Tree(std::string t, std::string l, int size)
 		: tag(t), lexeme(l, size) {}
 	void dump(int depth = 0)
 	{
 		for (int i = 0; i<depth; i++)
-			std::cout << "  ";
+			std::cout << "  |";
+
+		std::cout << tag << ": " << lexeme;
 		// Recurse over the children
+
+		for (auto child : this->children)
+		{
+			std::cout << std::endl;
+			child->dump(depth + 1);
+		}
 	}
 };
 
@@ -199,14 +226,16 @@ int main()
 
 		std::cout << "--Tables:\n";
 
-		Tree* rootTree;
-		Tree* rootTree2;
+		Tree* rootTree = new Tree("\nROOT1", "", 0);
+		Tree* rootTree2 = new Tree("\nROOT2", "", 0);
 
 		isTable("{}", &rootTree);
 		isTable("{1,2;3}", &rootTree);
 		isTable("{1,2;3,}", &rootTree);
 		isTable("{easyas=\"abc\";2;2,[\"hello\"]=\"world\",[3]=4}", &rootTree);
+		
 		isTable("{{1,2,3},data={0x77}}", &rootTree2);
+
 
 		isTable("{{}", &rootTree);
 		isTable("{;}", &rootTree);
@@ -217,6 +246,9 @@ int main()
 		isTable("{{1,2,3},data={0x77}}", &rootTree);
 		isDeclare("hej=afsaf", &rootTree);
 
+		rootTree->dump();
+
+		rootTree2->dump();
 	std::cout << "\nEND OF TEST\n" << std::endl;
 
 
@@ -265,7 +297,7 @@ bool isTable(const char* text, Tree **result)
 {
 	std::string str(text);
 	bool retValue = false;
-	Tree *child1;
+	Tree *child1 = new Tree("TABLE", str, 0);
 
 	if (str.find_first_of("{") == 0 && str.find_last_of("}") == str.length() - 1)
 	{
@@ -287,7 +319,7 @@ bool isTable(const char* text, Tree **result)
 			{
 				tabStrted--;
 			}
-			else if (tabStrted == 0)
+			if (tabStrted == 0)
 			{
 				if ((str[i] == ',' || str[i] == ';')/* && i != lastComma + 1*/)
 				{
@@ -350,7 +382,7 @@ bool isTable(const char* text, Tree **result)
 
 	if (retValue)
 	{
-		*result = new Tree("TABLE", nullptr, 0);
+		//*result = new Tree("TABLE", nullptr, 0);
 		(*result)->children.push_back(child1);
 	}
 
@@ -361,13 +393,13 @@ bool isElem(const char * text, Tree **result)
 {
 	std::string str(text);
 	bool retValue = false;
-	Tree *child1;
+	Tree *child1 = new Tree("ELEMENT", str, 0);
 
 	if (isValue(text, &child1) || isDeclare(text, &child1) || isHex(text, &child1) || isTable(text, &child1))
 	{
 		retValue = true;
 
-		*result = new Tree("ELEMENT", nullptr, 0);
+		//*result = new Tree("ELEMENT", nullptr, 0);
 		(*result)->children.push_back(child1);
 	}
 
@@ -383,13 +415,13 @@ bool isValue(const char* text, Tree **result)
 {
 	std::string str(text);
 	bool retValue = false;
-	Tree *child1;
+	Tree *child1 = new Tree("VALUE", str, 0);
 
 	if (isBracet(text, &child1) || isString(text, &child1) || isDigit(text, &child1) || isVarible(text, &child1))
 	{
 		retValue = true;
 
-		*result = new Tree("VARIBLE", nullptr, 0);
+		//*result = new Tree("VARIBLE", nullptr, 0);
 		(*result)->children.push_back(child1);
 	}
 
@@ -400,7 +432,7 @@ bool isBracet(const char* text, Tree **result)
 {
 	std::string str(text);
 	bool retValue = false;
-	Tree *child1;
+	Tree *child1 = new Tree("BRACKET", str, 0);
 
 	if (str.find_first_of("[") == 0 && str.find_last_of("]") == str.length() - 1)
 	{
@@ -412,7 +444,7 @@ bool isBracet(const char* text, Tree **result)
 		{
 			retValue = true/*checkString(str.c_str())*/;
 
-			*result = new Tree("BRACKET", nullptr, 0);
+			//*result = new Tree("BRACKET", nullptr, 0);
 			(*result)->children.push_back(child1);
 		}
 	}
@@ -425,7 +457,7 @@ bool isString(const char* text, Tree **result)
 {
 	std::string str(text);
 	bool retValue = false;
-	Tree * child1;
+	Tree * child1 = new Tree("STRING", str, 0);
 
 	if (str.find_first_of("\"") == 0 && str.find_last_of("\"") == str.length() - 1)
 	{
@@ -438,7 +470,7 @@ bool isString(const char* text, Tree **result)
 		{
 			retValue = true/*checkString(str.c_str())*/;
 
-			*result = new Tree("STRING", nullptr, 0);
+			//*result = new Tree("STRING", nullptr, 0);
 			(*result)->children.push_back(child1);
 		}
 
@@ -452,7 +484,7 @@ bool isVarible(const char* text, Tree **result)
 {
 	std::string str(text);
 	bool retValue = false;
-	Tree *child1;
+	Tree *child1 = new Tree("VARIBLE", str, 0);
 	
 	CharClass letter("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
 	CharClass alpha("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
@@ -466,7 +498,7 @@ bool isVarible(const char* text, Tree **result)
 	{
 		retValue = true;
 
-		*result = new Tree("VARIBLE", nullptr, 0);
+		//*result = new Tree("VARIBLE", nullptr, 0);
 		(*result)->children.push_back(child1);
 	}
 
@@ -477,7 +509,7 @@ bool isDigit(const char* text, Tree **result)
 {
 	std::string str(text);
 	bool retValue = false;
-	Tree *child1;
+	Tree *child1 = new Tree("DIGIT", str, 0);
 
 	CharClass digit("0123456789");
 
@@ -487,7 +519,7 @@ bool isDigit(const char* text, Tree **result)
 	{
 		retValue = true;
 
-		*result = new Tree("DIGIT", nullptr, 0);
+		//*result = new Tree("DIGIT", nullptr, 0);
 		(*result)->children.push_back(child1);
 	}
 
@@ -498,7 +530,7 @@ bool isHex(const char * text, Tree **result)
 {
 	std::string str(text);
 	bool retValue = false;
-	Tree *child1;
+	Tree *child1 = new Tree("HEX", str, 0);
 
 	CharClass digit("0123456789");
 
@@ -514,7 +546,7 @@ bool isHex(const char * text, Tree **result)
 	{
 		retValue = true;
 
-		*result = new Tree("HEX", nullptr, 0);
+		//*result = new Tree("HEX", nullptr, 0);
 		(*result)->children.push_back(child1);
 	}
 
@@ -525,7 +557,7 @@ bool isDeclare(const char * text, Tree **result)
 {
 	std::string str(text);
 	bool retValue = false;
-	Tree *child1;
+	Tree *child1 = new Tree("DECLARE", str, 0);
 
 	int n = str.find_first_of("=");
 	// only 1 =
@@ -545,7 +577,7 @@ bool isDeclare(const char * text, Tree **result)
 		{
 			retValue = true;
 
-			*result = new Tree("DECLARE", nullptr, 0);
+			//*result = new Tree("DECLARE", nullptr, 0);
 			(*result)->children.push_back(child1);
 		}
 	}
