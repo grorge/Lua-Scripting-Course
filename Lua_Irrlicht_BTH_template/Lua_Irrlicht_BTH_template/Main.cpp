@@ -57,23 +57,23 @@ void testRegex(Regex* reg, const char* text)
 
 //bool checkString(const char* text);
 
-bool isTable(const char* text);
+bool isTable(const char* text, Tree **result);
 
-bool isElem(const char* text);
+bool isElem(const char* text, Tree **result);
 
-bool isValue(const char* text);
+bool isValue(const char* text, Tree **result);
 
-bool isBracet(const char* text);
+bool isBracet(const char* text, Tree **result);
 
-bool isString(const char* text);
+bool isString(const char* text, Tree **result);
 
-bool isVarible(const char* text);
+bool isVarible(const char* text, Tree **result);
 
-bool isDigit(const char* text);
+bool isDigit(const char* text, Tree **result);
 
-bool isHex(const char* text);
+bool isHex(const char* text, Tree **result);
 
-bool isDeclare(const char* text);
+bool isDeclare(const char* text, Tree **result);
 
 
 
@@ -198,20 +198,24 @@ int main()
 
 
 		std::cout << "--Tables:\n";
-		isTable("{}");
-		isTable("{1,2;3}");
-		isTable("{1,2;3,}");
-		isTable("{easyas=\"abc\";2;2,[\"hello\"]=\"world\",[3]=4}");
-		isTable("{{1,2,3},data={0x77}}");
 
-		isTable("{{}");
-		isTable("{;}");
-		isTable("{1,,}");
-		isTable("{34=7}");
-		isTable("{alpha=beta=gamma}");
+		Tree* rootTree;
+		Tree* rootTree2;
 
-		isTable("{{1,2,3},data={0x77}}");
-		isDeclare("hej=afsaf");
+		isTable("{}", &rootTree);
+		isTable("{1,2;3}", &rootTree);
+		isTable("{1,2;3,}", &rootTree);
+		isTable("{easyas=\"abc\";2;2,[\"hello\"]=\"world\",[3]=4}", &rootTree);
+		isTable("{{1,2,3},data={0x77}}", &rootTree2);
+
+		isTable("{{}", &rootTree);
+		isTable("{;}", &rootTree);
+		isTable("{1,,}", &rootTree);
+		isTable("{34=7}", &rootTree);
+		isTable("{alpha=beta=gamma}", &rootTree);
+
+		isTable("{{1,2,3},data={0x77}}", &rootTree);
+		isDeclare("hej=afsaf", &rootTree);
 
 	std::cout << "\nEND OF TEST\n" << std::endl;
 
@@ -257,10 +261,11 @@ int main()
 	return 0;
 }
 
-bool isTable(const char* text)
+bool isTable(const char* text, Tree **result)
 {
 	std::string str(text);
 	bool retValue = false;
+	Tree *child1;
 
 	if (str.find_first_of("{") == 0 && str.find_last_of("}") == str.length() - 1)
 	{
@@ -298,7 +303,7 @@ bool isTable(const char* text)
 					
 
 
-					if (!isElem(element.c_str()))
+					if (!isElem(element.c_str(), &child1))
 					{
 						retValue = false;
 					}
@@ -323,7 +328,7 @@ bool isTable(const char* text)
 
 
 
-					if (!isElem(element.c_str()))
+					if (!isElem(element.c_str(), &child1))
 					{
 						retValue = false;
 					}
@@ -343,17 +348,27 @@ bool isTable(const char* text)
 		//retValue = true;//checkString(str.c_str());
 	}
 
+	if (retValue)
+	{
+		*result = new Tree("TABLE", nullptr, 0);
+		(*result)->children.push_back(child1);
+	}
+
 	return retValue;
 }
 
-bool isElem(const char * text)
+bool isElem(const char * text, Tree **result)
 {
 	std::string str(text);
 	bool retValue = false;
+	Tree *child1;
 
-	if (isValue(text) || isDeclare(text) || isHex(text) || isTable(text))
+	if (isValue(text, &child1) || isDeclare(text, &child1) || isHex(text, &child1) || isTable(text, &child1))
 	{
 		retValue = true;
+
+		*result = new Tree("ELEMENT", nullptr, 0);
+		(*result)->children.push_back(child1);
 	}
 
 	if (str == "")
@@ -364,23 +379,28 @@ bool isElem(const char * text)
 	return retValue;
 }
 
-bool isValue(const char* text)
+bool isValue(const char* text, Tree **result)
 {
 	std::string str(text);
 	bool retValue = false;
+	Tree *child1;
 
-	if (isBracet(text) || isString(text) || isDigit(text) || isVarible(text))
+	if (isBracet(text, &child1) || isString(text, &child1) || isDigit(text, &child1) || isVarible(text, &child1))
 	{
 		retValue = true;
+
+		*result = new Tree("VARIBLE", nullptr, 0);
+		(*result)->children.push_back(child1);
 	}
 
 	return retValue;
 }
 
-bool isBracet(const char* text)
+bool isBracet(const char* text, Tree **result)
 {
 	std::string str(text);
 	bool retValue = false;
+	Tree *child1;
 
 	if (str.find_first_of("[") == 0 && str.find_last_of("]") == str.length() - 1)
 	{
@@ -388,9 +408,12 @@ bool isBracet(const char* text)
 		str.pop_back();
 		str.erase(0, 1);;
 
-		if (isString(str.c_str()) || isDigit(str.c_str()))
+		if (isString(str.c_str(), &child1) || isDigit(str.c_str(), &child1))
 		{
 			retValue = true/*checkString(str.c_str())*/;
+
+			*result = new Tree("BRACKET", nullptr, 0);
+			(*result)->children.push_back(child1);
 		}
 	}
 
@@ -398,11 +421,11 @@ bool isBracet(const char* text)
 	return retValue;
 }
 
-bool isString(const char* text)
+bool isString(const char* text, Tree **result)
 {
 	std::string str(text);
 	bool retValue = false;
-
+	Tree * child1;
 
 	if (str.find_first_of("\"") == 0 && str.find_last_of("\"") == str.length() - 1)
 	{
@@ -414,6 +437,9 @@ bool isString(const char* text)
 		if (str.find("\"") == str.npos)
 		{
 			retValue = true/*checkString(str.c_str())*/;
+
+			*result = new Tree("STRING", nullptr, 0);
+			(*result)->children.push_back(child1);
 		}
 
 		retValue = true/*checkString(str.c_str())*/;
@@ -422,10 +448,11 @@ bool isString(const char* text)
 	return retValue;
 }
 
-bool isVarible(const char* text)
+bool isVarible(const char* text, Tree **result)
 {
 	std::string str(text);
 	bool retValue = false;
+	Tree *child1;
 	
 	CharClass letter("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
 	CharClass alpha("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
@@ -438,15 +465,19 @@ bool isVarible(const char* text)
 	if (startOnLetter.match(text) == str.length())
 	{
 		retValue = true;
+
+		*result = new Tree("VARIBLE", nullptr, 0);
+		(*result)->children.push_back(child1);
 	}
 
 	return retValue;
 }
 
-bool isDigit(const char* text)
+bool isDigit(const char* text, Tree **result)
 {
 	std::string str(text);
 	bool retValue = false;
+	Tree *child1;
 
 	CharClass digit("0123456789");
 
@@ -455,15 +486,19 @@ bool isDigit(const char* text)
 	if (key.match(text) == str.length())
 	{
 		retValue = true;
+
+		*result = new Tree("DIGIT", nullptr, 0);
+		(*result)->children.push_back(child1);
 	}
 
 	return retValue;
 }
 
-bool isHex(const char * text)
+bool isHex(const char * text, Tree **result)
 {
 	std::string str(text);
 	bool retValue = false;
+	Tree *child1;
 
 	CharClass digit("0123456789");
 
@@ -478,15 +513,19 @@ bool isHex(const char * text)
 	if (key.match(text) == str.length())
 	{
 		retValue = true;
+
+		*result = new Tree("HEX", nullptr, 0);
+		(*result)->children.push_back(child1);
 	}
 
 	return retValue;
 }
 
-bool isDeclare(const char * text)
+bool isDeclare(const char * text, Tree **result)
 {
 	std::string str(text);
 	bool retValue = false;
+	Tree *child1;
 
 	int n = str.find_first_of("=");
 	// only 1 =
@@ -499,12 +538,15 @@ bool isDeclare(const char * text)
 		secondHalf.erase(0, n + 1);
 
 		if (
-			(isBracet(firstHalf.c_str()) || isString(firstHalf.c_str()) || /*isDigit(firstHalf.c_str()) || */isVarible(firstHalf.c_str()))
+			(isBracet(firstHalf.c_str(), &child1) || isString(firstHalf.c_str(), &child1) || /*isDigit(firstHalf.c_str()) || */isVarible(firstHalf.c_str(), &child1))
 			&& 
-			(isString(secondHalf.c_str()) || isDigit(secondHalf.c_str()) || isTable(secondHalf.c_str()) || isVarible(secondHalf.c_str()))
+			(isString(secondHalf.c_str(), &child1) || isDigit(secondHalf.c_str(), &child1) || isTable(secondHalf.c_str(), &child1) || isVarible(secondHalf.c_str(), &child1))
 			)
 		{
 			retValue = true;
+
+			*result = new Tree("DECLARE", nullptr, 0);
+			(*result)->children.push_back(child1);
 		}
 	}
 
