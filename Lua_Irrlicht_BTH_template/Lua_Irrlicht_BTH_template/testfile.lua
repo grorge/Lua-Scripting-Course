@@ -4,7 +4,7 @@ camera({-10,0,-20},{0,2,0})
 
 table = {"id","name","type"}
 
---[[ testing the testfile
+-- testing the testfile
 
 for i=1,10 
 do 	
@@ -15,7 +15,7 @@ for k,v in pairs(getNodes())
 do 
 	for kk,vv in pairs(v) 
 	do 
-		print(k,kk,vv) 
+		print(k,kk,vv)
 	end 
 end
 

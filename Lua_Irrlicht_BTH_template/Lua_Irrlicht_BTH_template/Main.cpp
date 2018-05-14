@@ -15,6 +15,48 @@
 // Global interface to call functions from the Lua terminal
 Interface intf;
 
+
+class MyEventReceiver : public irr::IEventReceiver
+{
+public:
+	// This is the one method that we have to implement
+	virtual bool OnEvent(const irr::SEvent& event)
+	{
+		// Remember whether each key is down or up
+		if (event.EventType == irr::EMIE_MOUSE_MOVED)
+		{
+			this->mousePosition.X = event.MouseInput.X;
+			this->mousePosition.Y = event.MouseInput.Y;
+		}
+
+		return false;
+	}
+
+	// This is used to check whether a key is being held down
+	virtual bool IsKeyDown(irr::EKEY_CODE keyCode) const
+	{
+		return KeyIsDown[keyCode];
+	}
+
+	MyEventReceiver()
+	{
+		for (irr::u32 i = 0; i<irr::KEY_KEY_CODES_COUNT; ++i)
+			KeyIsDown[i] = false;
+	}
+
+	irr::core::position2di getMousePosition()
+	{
+		return mousePosition;
+	};
+
+private:
+	// We use this array to store the current state of each key
+	bool KeyIsDown[irr::KEY_KEY_CODES_COUNT];
+
+	irr::core::position2di mousePosition;
+};
+
+
 void ConsoleThread(lua_State* L) {
 	char command[1000];
 	while(GetConsoleWindow()) {
@@ -190,7 +232,7 @@ static int l_addMesh(lua_State *L) {
 
 static int l_listNodes(lua_State *L) {
 	//intf.getNodes();
-	return intf.getNodes();;  /* number of results */
+	return intf.getNodes();  /* number of results */
 }
 
 static int l_camera(lua_State *L) {
@@ -323,7 +365,10 @@ int main()
 
 		std::thread conThread(ConsoleThread, L);
 
-	irr::IrrlichtDevice* device = irr::createDevice(irr::video::EDT_SOFTWARE, irr::core::dimension2d<irr::u32>(640, 480), 16, false, false, true, 0);
+
+	MyEventReceiver eventRec;
+
+	irr::IrrlichtDevice* device = irr::createDevice(irr::video::EDT_SOFTWARE, irr::core::dimension2d<irr::u32>(640, 480), 16, false, false, true, &eventRec);
 	if(!device)
 		return 1;
 
@@ -380,7 +425,7 @@ int main()
 		//intf.addBox({(float)i, (float)i, (float)i}, i);
 	}
 
-
+	intf.setCam(smgr->addCameraSceneNodeFPS());
 
 	guienv->addStaticText(L"Hello World! This is the Irrlicht Software renderer!", irr::core::rect<irr::s32>(10, 10, 260, 22), true);
 
@@ -395,7 +440,7 @@ int main()
 
 
 	// Loads the lua testfile
-	int error = luaL_loadfile(L, "C:/Users/maxjo/Source/Repos/Lua-Scripting-Course/Lua_Irrlicht_BTH_template/Lua_Irrlicht_BTH_template/testfile.lua");
+	int error = luaL_loadfile(L, "C:/Users/maxjo/Source/Repos/Lua-Scripting-Course/Lua_Irrlicht_BTH_template/Lua_Irrlicht_BTH_template/testfileXXX.lua");
 	if (error) {
 		/* If something went wrong, error message is at the top of */
 		/* the stack */
@@ -408,9 +453,15 @@ int main()
 		std::cout << lua_tostring(L, -1) << std::endl;
 	}
 
+	
 	while(device->run()) {
 		driver->beginScene(true, true, irr::video::SColor(255, 90, 101, 140));
 
+		if (!device->isWindowFocused())
+		{
+			Sleep(1);
+			continue;
+		}
 
 		smgr->drawAll();
 		guienv->drawAll();

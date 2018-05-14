@@ -148,7 +148,7 @@ int Interface::addBox(irr::core::vector3df pos, float size, std::string name)
 		
 	Box* testObj;
 	testObj = new Box(this->smgr->getRootSceneNode(), this->smgr, this->IDs, v, 24, name);
-
+	
 	this->nodes.push_back(testObj);
 
 	this->IDs++;
@@ -160,66 +160,54 @@ int Interface::addBox(irr::core::vector3df pos, float size, std::string name)
 
 int Interface::getNodes()
 {
-	std::string returnTable = "Boxes: \n";
-
 	lua_newtable(this->L);
 
 	for (int i = 0; i < this->nodes.size(); i++)
 	{
-		lua_getglobal(this->L, "table");
-
-
-
+		lua_createtable(this->L, 0, 3);
+			
+		//lua_pushnumber(L, 1);
 		lua_pushnumber(L, this->nodes[i]->getID());
-		lua_rawseti(this->L, -2, 1);
+		lua_setfield(this->L, -2, "ID");
+		//lua_rawseti(this->L, -2, 1);
 
 		lua_gettop(L);
 
 		std::string name = "NaN mesh";
+		std::string type = "NaN OBJ";
 		if (dynamic_cast<Box*>(this->nodes[i]))
 		{
 			name = dynamic_cast<Box*>(this->nodes[i])->getName();
+			type = dynamic_cast<Box*>(this->nodes[i])->printType();
 		}
 
+		//lua_pushnumber(L, 2);
 		lua_pushstring(L, name.c_str());
-		lua_rawseti(this->L, -2, 2);
-
-
-		std::string type = std::to_string(this->nodes[i]->getType());
-
+		lua_setfield(this->L, -2, "name");
+		
+		//lua_pushnumber(L, 3);
 		lua_pushstring(L, type.c_str());
-		lua_rawseti(this->L, -2, 3);
+		lua_setfield(this->L, -2, "type");
+		//lua_settable(this->L, -3);
 
-
-
-
-		//returnTable = std::to_string( this->nodes[i]->getID()) + "	" + name 
-		//	+ "\n";
-		//
-		////const char* toTable = returnTable.c_str();
-
-		//// Pushes the number in the second arg to the top of hte stack
-		//lua_pushstring(this->L, returnTable.c_str());
-		///* (lua_state - where is the stack the table is - where in the table the data is stored )*/
-		//// The data is the data that 
+		
 		lua_rawseti(this->L, 1, i+1);
 	}
-
-
 	
-
 	return 1;
 }
 
 int Interface::camera(irr::core::vector3df pos, irr::core::vector3df target)
 {
-	smgr->addCameraSceneNode(0, pos, target);
+	//this->cam = smgr->addCameraSceneNodeFPS();
+	this->cam = smgr->addCameraSceneNode(0, pos, target);
 	
 	return int();
 }
 
 int Interface::snapshot(std::string filename)
 {
+
 	irr::video::IImage* screenshot = this->driver->createScreenShot();
 	
 	this->driver->writeImageToFile(screenshot, filename.c_str());

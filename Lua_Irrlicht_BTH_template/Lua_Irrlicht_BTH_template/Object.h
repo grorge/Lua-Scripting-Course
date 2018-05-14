@@ -45,11 +45,15 @@ public:
 		return this->mater;
 	}
 
+	std::string printType() { return this->type;};
+
 private:
 	//pos - normal - color - texturecoord	
 	irr::video::S3DVertex verts[3];
 	irr::video::SMaterial mater;
 	irr::core::aabbox3d<irr::f32> bbox;
+
+	std::string type;
 };
 
 class Box : public irr::scene::ISceneNode
@@ -81,6 +85,7 @@ public:
 		return this->mater;
 	}
 
+	std::string printType() { return this->type; };
 private:
 	//pos - normal - color - texturecoord	
 	irr::video::S3DVertex verts[24];
@@ -88,6 +93,7 @@ private:
 	irr::core::aabbox3d<irr::f32> bbox;
 
 	std::string name = std::string();
+	std::string type;
 };
 
 #endif // !OBJECT_H

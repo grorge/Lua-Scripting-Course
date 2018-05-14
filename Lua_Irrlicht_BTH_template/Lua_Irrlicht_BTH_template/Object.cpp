@@ -7,6 +7,7 @@ Object::Object(irr::scene::ISceneNode * parent, irr::scene::ISceneManager * smgr
 {
 	this->mater.Wireframe = false;
 	this->mater.Lighting = false;
+	this->mater.BackfaceCulling = false;
 
 	int nrOfPoint = verts.size();
 
@@ -21,6 +22,8 @@ Object::Object(irr::scene::ISceneNode * parent, irr::scene::ISceneManager * smgr
 	{
 		this->bbox.addInternalPoint(this->verts[i].Pos);
 	}
+
+	this->type = "OBJ";
 }
 
 Object::~Object()
@@ -52,6 +55,7 @@ Box::Box(irr::scene::ISceneNode * parent, irr::scene::ISceneManager * smgr, irr:
 
 	this->mater.Wireframe = false;
 	this->mater.Lighting = false;
+	this->mater.BackfaceCulling = false;
 
 	irr::core::vector3di normal = { 0, 0, 1};
 	int tu = 0;
@@ -223,6 +227,8 @@ Box::Box(irr::scene::ISceneNode * parent, irr::scene::ISceneManager * smgr, irr:
 	{
 		this->bbox.addInternalPoint(this->verts[i].Pos);
 	}
+
+	this->type = "BOX";
 }
 
 Box::~Box()

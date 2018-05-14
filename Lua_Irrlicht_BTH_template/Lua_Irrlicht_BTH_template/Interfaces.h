@@ -10,7 +10,6 @@
 #include "Object.h"
 
 
-
 class Interface
 {
 public:
@@ -33,6 +32,10 @@ public:
 	int addTexture(irr::video::SColor color, std::string name);
 	int bind(std::string node, std::string texture);
 	
+
+	irr::scene::ICameraSceneNode* getCam() { return this->cam; 	};
+	void setCam(irr::scene::ICameraSceneNode* input) { this->cam = input; };
+
 private:
 	lua_State* L;
 
@@ -41,9 +44,12 @@ private:
 	irr::gui::IGUIEnvironment* guienv = nullptr;
 
 	irr::core::array<irr::scene::ISceneNode*> nodes;
+	irr::scene::ICameraSceneNode* cam;
 	//irr::core::array<Object*> meshes;
 
 	int IDs = 100;
+
+
 };
 
 
