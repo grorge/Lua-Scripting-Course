@@ -68,3 +68,20 @@ int Seq::match(char const *text)
 
 #endif // !REGEX_H
 
+/*
+---RULES---
+
+TABLE: "{" TABLE2 "}"
+
+TABLE2: ELEMENT SEMICOMMA TABLE2 | ELEMENT | empty
+
+ELEMENT: VALUE | DECLARE | TABLE1
+
+VALUE: BRACET | TABLE3 | VARIBLE
+
+BRACET: "[" TABLE3 "]"
+
+TABLE3: STRING | DIGIT
+
+DECLARE: (VARIBLE | BRACET) "=" (TABLE3 | TABLE1)
+*/

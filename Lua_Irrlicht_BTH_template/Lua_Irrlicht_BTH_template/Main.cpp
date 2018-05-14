@@ -15,23 +15,6 @@
 #include "Regex.h"
 
 
-/*
-					---RULES---
-
-TABLE: "{" TABLE2* "}"
-
-TABLE2: ELEMENT (SEMICOMMA | LAST)
-
-ELEMENT: VALUE | DECLARE | TABLE1
-
-VALUE: BRACET | TABLE3 | VARIBLE
-
-BRACET: "[" TABLE3 "]"
-
-TABLE3: STRING | DIGIT
-
-DECLARE: (VARIBLE | BRACET) "=" (TABLE3 | TABLE1)
-*/
 
 class Tree
 {
@@ -43,7 +26,7 @@ public:
 	void dump(int depth = 0)
 	{
 		for (int i = 0; i<depth; i++)
-			std::cout << "  |";
+			std::cout << "|  ";
 
 		std::cout << tag << ": " << lexeme;
 		// Recurse over the children
@@ -243,12 +226,12 @@ int main()
 		isTable("{34=7}", &rootTree);
 		isTable("{alpha=beta=gamma}", &rootTree);
 
-		isTable("{{1,2,3},data={0x77}}", &rootTree);
-		isDeclare("hej=afsaf", &rootTree);
+		//isTable("{{1,2,3},data={0x77}}", &rootTree);
+		//isDeclare("hej=afsaf", &rootTree);
 
 		rootTree->dump();
-
 		rootTree2->dump();
+
 	std::cout << "\nEND OF TEST\n" << std::endl;
 
 
@@ -293,6 +276,63 @@ int main()
 	return 0;
 }
 
+bool getElements(const char* text, Tree **treeHead)
+{
+	std::string str(text);
+	int tabStarted = 0;
+
+	// ELEMENT SEMICOMMA TABLE2
+	for (int i = 0; text[i] != '\0'; i++)
+	{
+		if (text[i] == '{')
+		{
+			tabStarted++;
+		}
+		else if (text[i] == '}')
+		{
+			tabStarted--;
+		}
+
+		// FINDS SEMICOMMA
+		if (tabStarted == 0 && (text[i] == ',' || text[i] == ';'))
+		{
+			std::string element(str);
+
+			element.erase(i, str.length());
+			
+			// CHECKS ELEMENT
+			if (!isElem(element.c_str(), treeHead))
+			{
+				return false;
+			}
+			else
+			{
+				Tree *child1 = new Tree("SEMICOMMA", std::string(1, text[i]), 0);
+				(*treeHead)->children.push_back(child1);
+
+				str.erase(0, i + 1);
+				
+				Tree *child2 = new Tree("TABLE2", str, 0);
+				(*treeHead)->children.push_back(child2);
+
+				return getElements(str.c_str(), &child2);
+			}
+		}
+	}
+	if (tabStarted != 0)
+	{
+		return false;
+	}
+
+	// ELEMENT | empty
+	if (isElem(str.c_str(), treeHead) || str == "")
+	{
+		return true;
+	}
+
+	return false;
+}
+
 bool isTable(const char* text, Tree **result)
 {
 	std::string str(text);
@@ -304,80 +344,8 @@ bool isTable(const char* text, Tree **result)
 		// Remove wings
 		str.pop_back();
 		str.erase(0, 1);
-
-		retValue = true;
-		int lastComma = 0;
-		int i = 0;
-		int tabStrted = 0;
-		while (i < str.length())
-		{
-			if (str[i] == '{')
-			{
-				tabStrted++;
-			}
-			else if (str[i] == '}')
-			{
-				tabStrted--;
-			}
-			if (tabStrted == 0)
-			{
-				if ((str[i] == ',' || str[i] == ';')/* && i != lastComma + 1*/)
-				{
-					// Found a element
-					std::string element(str);
-
-
-					element.erase(i, str.length());
-					if (lastComma > 0)
-					{
-						element.erase(0, lastComma+1);
-					}
-					
-
-
-					if (!isElem(element.c_str(), &child1))
-					{
-						retValue = false;
-					}
-						
-					lastComma = i;
-
-
-				}
-				else if (i + 1 == str.length())
-				{
-					i++;
-
-					// Found a element
-					std::string element(str);
-
-
-					element.erase(i, str.length());
-					if (lastComma > 0)
-					{
-						element.erase(0, lastComma + 1);
-					}
-
-
-
-					if (!isElem(element.c_str(), &child1))
-					{
-						retValue = false;
-					}
-
-				}
-			}
-
-
-			i++;
-		}
-
-		if (tabStrted != 0)
-		{
-			retValue = false;
-		}
-
-		//retValue = true;//checkString(str.c_str());
+		
+		retValue = getElements(str.c_str(), &child1);
 	}
 
 	if (retValue)
@@ -395,7 +363,8 @@ bool isElem(const char * text, Tree **result)
 	bool retValue = false;
 	Tree *child1 = new Tree("ELEMENT", str, 0);
 
-	if (isValue(text, &child1) || isDeclare(text, &child1) || isHex(text, &child1) || isTable(text, &child1))
+	if (isValue(text, &child1) || isDeclare(text, &child1)
+		|| isHex(text, &child1) || isTable(text, &child1))
 	{
 		retValue = true;
 
@@ -513,7 +482,7 @@ bool isDigit(const char* text, Tree **result)
 
 	CharClass digit("0123456789");
 
-	Star key(&digit);
+	Seq key({&digit, new Star(&digit) });
 
 	if (key.match(text) == str.length())
 	{
