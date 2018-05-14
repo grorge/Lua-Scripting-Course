@@ -199,18 +199,29 @@ int Interface::getNodes()
 
 int Interface::camera(irr::core::vector3df pos, irr::core::vector3df target)
 {
-	//this->cam = smgr->addCameraSceneNodeFPS();
-	this->cam = smgr->addCameraSceneNode(0, pos, target);
+	this->cam = smgr->addCameraSceneNodeFPS();
+	this->cam->setPosition(pos);
+	this->cam->setTarget(target);
+	//this->cam = smgr->addCameraSceneNode(0, pos, target);
 	
-	return int();
+	return 1;
 }
 
 int Interface::snapshot(std::string filename)
 {
 
+	driver->beginScene(true, true, irr::video::SColor(255, 90, 101, 140));
+
+
+	smgr->drawAll();
+	guienv->drawAll();
+
 	irr::video::IImage* screenshot = this->driver->createScreenShot();
 	
 	this->driver->writeImageToFile(screenshot, filename.c_str());
+
+
+	driver->endScene();
 
 	return 1;
 }

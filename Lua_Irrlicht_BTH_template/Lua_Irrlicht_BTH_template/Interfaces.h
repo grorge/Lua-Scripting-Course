@@ -32,9 +32,14 @@ public:
 	int addTexture(irr::video::SColor color, std::string name);
 	int bind(std::string node, std::string texture);
 	
-
 	irr::scene::ICameraSceneNode* getCam() { return this->cam; 	};
 	void setCam(irr::scene::ICameraSceneNode* input) { this->cam = input; };
+
+	std::string takeShot() { 
+		std::string temp = this->screenshot;
+		this->screenshot == "";
+		return temp;	
+	};
 
 private:
 	lua_State* L;
@@ -49,7 +54,7 @@ private:
 
 	int IDs = 100;
 
-
+	std::string screenshot = "";
 };
 
 

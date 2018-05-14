@@ -141,7 +141,7 @@ static int l_addBox(lua_State *L) {
 	else
 	{
 		// wrong input
-		lua_pushstring(L, "wrong input");
+		luaL_dostring(L, "wrong input");
 	}
 
 	
@@ -440,7 +440,7 @@ int main()
 
 
 	// Loads the lua testfile
-	int error = luaL_loadfile(L, "C:/Users/maxjo/Source/Repos/Lua-Scripting-Course/Lua_Irrlicht_BTH_template/Lua_Irrlicht_BTH_template/testfileXXX.lua");
+	int error = luaL_loadfile(L, "C:/Users/maxjo/Source/Repos/Lua-Scripting-Course/Lua_Irrlicht_BTH_template/Lua_Irrlicht_BTH_template/testfile.lua");
 	if (error) {
 		/* If something went wrong, error message is at the top of */
 		/* the stack */
@@ -455,13 +455,14 @@ int main()
 
 	
 	while(device->run()) {
-		driver->beginScene(true, true, irr::video::SColor(255, 90, 101, 140));
-
 		if (!device->isWindowFocused())
 		{
 			Sleep(1);
 			continue;
 		}
+
+		driver->beginScene(true, true, irr::video::SColor(255, 90, 101, 140));
+		
 
 		smgr->drawAll();
 		guienv->drawAll();
