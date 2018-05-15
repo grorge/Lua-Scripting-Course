@@ -141,7 +141,7 @@ static int l_addBox(lua_State *L) {
 	else
 	{
 		// wrong input
-		luaL_dostring(L, "Error: Wrong arguments')");
+		luaL_dostring(L, "print('Error: Wrong arguments')");
 	}
 
 	
