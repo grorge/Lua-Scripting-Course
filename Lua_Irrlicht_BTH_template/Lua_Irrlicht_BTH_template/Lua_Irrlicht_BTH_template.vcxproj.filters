@@ -38,5 +38,8 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="test1.lua" />
+    <None Include="errorcheck.lua">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

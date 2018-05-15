@@ -209,17 +209,21 @@ int Interface::camera(irr::core::vector3df pos, irr::core::vector3df target)
 
 int Interface::snapshot(std::string filename)
 {
-
-	driver->beginScene(true, true, irr::video::SColor(255, 90, 101, 140));
-
-
+	driver->beginScene(true, true, irr::video::SColor(255, 90, 101, 140));	
 	smgr->drawAll();
 	guienv->drawAll();
-
+		
 	irr::video::IImage* screenshot = this->driver->createScreenShot();
-	
 	this->driver->writeImageToFile(screenshot, filename.c_str());
 
+	FILE* file;
+
+	fopen_s(&file, filename.c_str(), "r");
+
+	if (!file)
+	{
+		luaL_dostring(this->L, "print('Error: file could not be opened')");
+	}
 
 	driver->endScene();
 
