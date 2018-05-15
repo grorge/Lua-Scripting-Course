@@ -85,65 +85,56 @@ static int l_addBox(lua_State *L) {
 	// createes the vector to hold the position
 	irr::core::vector3df vector;
 	
-	// check if its a table
-	if (lua_istable(L, 1) && lua_isnumber(L, 2))
+	// check if its a table	
+	luaL_argcheck(L, lua_istable(L, 1) && lua_isnumber(L, 2), 1, "Error: Wrong arguments");
+
+	int check = 0;
+	// pushes the first element in the table to the stack
+	lua_rawgeti(L, 1, 1);
+	// checks if its a number
+	luaL_argcheck(L, lua_isnumber(L, -1), 1, "Error: Not a number in cordinates");
+	check += lua_isnumber(L, -1);
+	// adds the cumber to the x0 var
+	vector.X = luaL_checknumber(L, -1);
+	// pops the element
+	lua_pop(L, 1);
+
+	// pushes the second element in the table to the stack
+	lua_rawgeti(L, 1, 2);
+	// checks if its a number
+	luaL_argcheck(L, lua_isnumber(L, -1), 1, "Error: Not a number in cordinates");
+	check += lua_isnumber(L, -1);
+	// adds the cumber to the x0 var
+	vector.Y = luaL_checknumber(L, -1);
+	// pops the element
+	lua_pop(L, 1);
+
+	// pushes the third element in the table to the stack
+	lua_rawgeti(L, 1, 3);
+	// checks if its a number
+	luaL_argcheck(L, lua_isnumber(L, -1), 1, "Error: Not a number in cordinates");
+	check += lua_isnumber(L, -1);
+	// adds the cumber to the x0 var
+	vector.Z = luaL_checknumber(L, -1);
+	// pops the element
+	lua_pop(L, 1);
+
+	luaL_argcheck(L, lua_isnumber(L, 2), 1, "Error: Not a number in size");
+	float s = luaL_checknumber(L, 2);
+
+
+	//luaL_argcheck(L, lua_isstring(L, 3) || lua_isnil(L, 3), 1, "Error: Names must be strings");
+	//check for a name
+	if (lua_isstring(L, 3))
 	{
-		int check = 0;
-		// pushes the first element in the table to the stack
-		lua_rawgeti(L, 1, 1);
-		// checks if its a number
-		check += lua_isnumber(L, -1);
-		// adds the cumber to the x0 var
-		vector.X = luaL_checknumber(L, -1);
-		// pops the element
-		lua_pop(L, 1);
+		std::string boxName = luaL_checkstring(L, 3);
 
-		// pushes the second element in the table to the stack
-		lua_rawgeti(L, 1, 2);
-		// checks if its a number
-		check += lua_isnumber(L, -1);
-		// adds the cumber to the x0 var
-		vector.Y = luaL_checknumber(L, -1);
-		// pops the element
-		lua_pop(L, 1);
-
-		// pushes the third element in the table to the stack
-		lua_rawgeti(L, 1, 3);
-		// checks if its a number
-		check += lua_isnumber(L, -1);
-		// adds the cumber to the x0 var
-		vector.Z = luaL_checknumber(L, -1);
-		// pops the element
-		lua_pop(L, 1);
-
-		if (check == 3)
-		{
-			float s = luaL_checknumber(L, 2);
-
-			//check for a name
-			if (lua_isstring(L, 3))
-			{
-				std::string boxName = luaL_checkstring(L, 3);
-
-				returnValue = intf.addBox({ vector.X, vector.Y, vector.Z }, s, boxName);
-			}
-			else // no name case
-			{
-				returnValue = intf.addBox({ vector.X, vector.Y, vector.Z }, s);
-			}
-		}
-		else
-		{
-			// Not number in vector
-			// This is done by lua_checknumber()
-		}
+		returnValue = intf.addBox({ vector.X, vector.Y, vector.Z }, s, boxName);
 	}
-	else
+	else // no name case
 	{
-		// wrong input
-		luaL_dostring(L, "print('Error: Wrong arguments')");
+		returnValue = intf.addBox({ vector.X, vector.Y, vector.Z }, s);
 	}
-
 	
 	return returnValue;  /* number of results */
 }
@@ -155,121 +146,70 @@ static int l_addMesh(lua_State *L) {
 
 	// sees the number of elements in stack
 	nrOfTables = lua_gettop(L);
+		
+	luaL_argcheck(L, nrOfTables == 1 && lua_istable(L, 1), 1, "Error: Input should be 1 table containing VERTICES");
+	// Array with all the posints to draw
+	irr::core::array<irr::core::vector3df> posVectors;
 
+	// To hold the number of tablesadded
+	int nrOfPositions = 1;
 
-	// It is one table on the stack
-	if (nrOfTables == 1 && lua_istable(L, 1))
+	// pushes first table in hte input table
+	lua_rawgeti(L, 1, nrOfPositions);
+	while (lua_istable(L, -1) == 1)
 	{
-		// Array with all the posints to draw
-		irr::core::array<irr::core::vector3df> posVectors;
+		luaL_argcheck(L, lua_rawlen(L, -1) == 3, 4, "Error: number of components ");
+		// createes the vector to hold the position
+		irr::core::vector3df vector;
 
-		// To hold the number of tablesadded
-		int nrOfPositions = 1;
+		nrOfTables = lua_gettop(L);
+		// pushes the first element in the table to the stack
+		lua_rawgeti(L, -1, 1);
+		// checks if its a number
+		luaL_argcheck(L, lua_isnumber(L, -1), 1, "Error: non-numeric coordinates");
+		// adds the cumber to the x0 var
+		vector.X = luaL_checknumber(L, -1);
+		// pops the element
+		lua_pop(L, 1);
 
-		// pushes first table in hte input table
-		lua_rawgeti(L, 1, nrOfPositions);
-		while (lua_istable(L, -1) == 1)
-		{
-			// createes the vector to hold the position
-			irr::core::vector3df vector;
+		// pushes the second element in the table to the stack
+		lua_rawgeti(L, -1, 2);
+		// checks if its a number
+		luaL_argcheck(L, lua_isnumber(L, -1), 2, "Error: non-numeric coordinates");
+		// adds the cumber to the x0 var
+		vector.Y = luaL_checknumber(L, -1);
+		// pops the element
+		lua_pop(L, 1);
 
-			nrOfTables = lua_gettop(L);
-			// pushes the first element in the table to the stack
-			lua_rawgeti(L, -1, 1);
-			// checks if its a number
-			if (lua_isnumber(L, -1))
-			{
-				// adds the cumber to the x0 var
-				vector.X = luaL_checknumber(L, -1);
+		// pushes the third element in the table to the stack
+		lua_rawgeti(L, -1, 3);
+		// checks if its a number
+		luaL_argcheck(L, lua_isnumber(L, -1), 3, "Error: non-numeric coordinates");
+		// adds the cumber to the x0 var
+		vector.Z = luaL_checknumber(L, -1);
+		// pops the element
+		lua_pop(L, 1);
+		
 
-				// pops the element
-				lua_pop(L, 1);
-
-				// pushes the second element in the table to the stack
-				lua_rawgeti(L, -1, 2);
-				// checks if its a number
-				if (lua_isnumber(L, -1))
-				{
-					// adds the cumber to the x0 var
-					vector.Y = luaL_checknumber(L, -1);
-
-					// pops the element
-					lua_pop(L, 1);
-
-					// pushes the third element in the table to the stack
-					lua_rawgeti(L, -1, 3);
-					// checks if its a number
-					if (lua_isnumber(L, -1))
-					{
-						// adds the cumber to the x0 var
-						vector.Z = luaL_checknumber(L, -1);
+		// Pops the table in the first place from the stack
+		lua_pop(L, 1);
 
 
-						// pops the element
-						lua_pop(L, 1);
+		posVectors.push_back(vector);
+		std::string temp = "print('next vert')";
+		luaL_dostring(L, temp.c_str());
 
-						posVectors.push_back(vector);
-
-						if (lua_rawgeti(L, -1, 4))
-						{
-							luaL_dostring(L, "print('Non-Fatal Error: number of components - removes after third arg')");
-						}
-
-						// Pops the table in the first place from the stack
-						lua_pop(L, 1);
-
-
-						std::string temp = "print('next vert')";
-						luaL_dostring(L, temp.c_str());
-
-						nrOfPositions++;
-						// pushes the table on the first place in the table
-						lua_rawgeti(L, 1, nrOfPositions);
-					}
-					else
-					{
-						luaL_dostring(L, "print('Fatal Error: non-numeric coordinates')");
-						// Pops the table in the first place from the stack
-						lua_pop(L, 1);
-						break;
-					}
-				}
-				else
-				{
-					luaL_dostring(L, "print('Fatal Error: non-numeric coordinates')");
-					// Pops the table in the first place from the stack
-					lua_pop(L, 1);
-					break;
-				}
-				
-			}
-			else
-			{
-				luaL_dostring(L, "print('Fatal Error: non-numeric coordinates')");
-				// Pops the table in the first place from the stack
-				lua_pop(L, 1);
-				break;
-			}				
-			
-		}
-
-		if (posVectors.size() % 3 > 0)
-		{
-			// post a mesage saying it will only draw in pairs of 3
-			// Not a crash
-			luaL_dostring(L, "print('Non-Fatal Error: not a valid number of vertices')");
-		}
-
-
-		intf.addMesh(posVectors);
+		nrOfPositions++;
+		// pushes the table on the first place in the table
+		lua_rawgeti(L, 1, nrOfPositions);		
 	}
-	else
-	{
-		// wrong in input
-			// first input is not a table
-			// not 1 argument on stack
-		luaL_dostring(L, "print('Fatal Error: Input should be 1 table containing meshes')");
-	}
+
+
+	luaL_argcheck(L, (posVectors.size() % 3 == 0), 99, "Error: not a valid number of vertices ");
+
+
+
+	intf.addMesh(posVectors);
 	
 
 	std::string temp = "print('next Mesh')";
@@ -292,80 +232,57 @@ static int l_camera(lua_State *L) {
 	// It is one table on the stack
 	if (lua_istable(L, 1))
 	{
+		luaL_argcheck(L, lua_rawlen(L, 1) == 3, 4, "Error: target has wrong number of coordinates");
 
 		// pushes the first element in the table to the stack
 		lua_rawgeti(L, 1, 1);
 		// checks if its a number
-		if(lua_isnumber(L, -1))		
-			vectorPos.X = luaL_checknumber(L, -1);
-		else if (lua_isnil(L, -1))
-			luaL_dostring(L, "print('Fatal Error: target has wrong number of coordinates')");
-		else
-			luaL_dostring(L, "print('Fatal Error: cordinate is not a number')");
+		luaL_argcheck(L, lua_isnumber(L, -1), 1, "Error: cordinate is not a number");
+		vectorPos.X = luaL_checknumber(L, -1);
 		// pops the element
 		lua_pop(L, 1);
 
 		// pushes the second element in the table to the stack
 		lua_rawgeti(L, 1, 2);
 		// checks if its a number
-		if (lua_isnumber(L, -1))
+		luaL_argcheck(L, lua_isnumber(L, -1), 2, "Error: cordinate is not a number");
 			vectorPos.Y = luaL_checknumber(L, -1);
-		else if (lua_isnil(L, -1))
-			luaL_dostring(L, "print('Fatal Error: target has wrong number of coordinates')");
-		else
-			luaL_dostring(L, "print('Fatal Error: cordinate is not a number')");
 		// pops the element
 		lua_pop(L, 1);
 
 		// pushes the third element in the table to the stack
 		lua_rawgeti(L, 1, 3);
 		// checks if its a number
-		if (lua_isnumber(L, -1))
+		luaL_argcheck(L, lua_isnumber(L, -1), 3, "Error: cordinate is not a number");
 			vectorPos.Z = luaL_checknumber(L, -1);
-		else if (lua_isnil(L, -1))
-			luaL_dostring(L, "print('Fatal Error: target has wrong number of coordinates')");
-		else
-			luaL_dostring(L, "print('Fatal Error: cordinate is not a number')");
 		// pops the element
 		lua_pop(L, 1);
 	}
 	// It is one table on the stack
 	if (lua_istable(L, 2))
 	{
-
+		luaL_argcheck(L, lua_rawlen(L, 2) == 3, 4, "Error: target has wrong number of coordinates");
 		// pushes the first element in the table to the stack
 		lua_rawgeti(L, 2, 1);
 		// checks if its a number
-		if (lua_isnumber(L, -1))
+		luaL_argcheck(L, lua_isnumber(L, -1), 1, "Error: cordinate is not a number");
 			vectorDest.X = luaL_checknumber(L, -1);
-		else if (lua_isnil(L, -1))
-			luaL_dostring(L, "print('Fatal Error: target has wrong number of coordinates')");
-		else
-			luaL_dostring(L, "print('Fatal Error: cordinate is not a number')");
 		// pops the element
 		lua_pop(L, 1);
 
 		// pushes the second element in the table to the stack
 		lua_rawgeti(L, 2, 2);
 		// checks if its a number
-		if (lua_isnumber(L, -1))
+		luaL_argcheck(L, lua_isnumber(L, -1), 2, "Error: cordinate is not a number");
 			vectorDest.Y = luaL_checknumber(L, -1);
-		else if (lua_isnil(L, -1))
-			luaL_dostring(L, "print('Fatal Error: target has wrong number of coordinates')");
-		else
-			luaL_dostring(L, "print('Fatal Error: cordinate is not a number')");
 		// pops the element
 		lua_pop(L, 1);
 
 		// pushes the third element in the table to the stack
 		lua_rawgeti(L, 2, 3);
 		// checks if its a number
-		if (lua_isnumber(L, -1))
+		luaL_argcheck(L, lua_isnumber(L, -1), 3, "Error: cordinate is not a number");
 			vectorDest.Z = luaL_checknumber(L, -1);
-		else if (lua_isnil(L, -1))
-			luaL_dostring(L, "print('Fatal Error: target has wrong number of coordinates')");
-		else
-			luaL_dostring(L, "print('Fatal Error: cordinate is not a number')");
 		// pops the element
 		lua_pop(L, 1);
 	}
@@ -395,7 +312,7 @@ static int l_snapshot(lua_State *L) {
 
 	std::string fileName = luaL_checkstring(L, -1);
 
-	std::string filePath = "C:/Users/maxjo/Source/Repos/Lua-Scripting-Course/Lua_Irrlicht_BTH_template/Lua_Irrlicht_BTH_template/" + fileName;
+	std::string filePath = /*"C:/Users/maxjo/Source/Repos/Lua-Scripting-Course/Lua_Irrlicht_BTH_template/Lua_Irrlicht_BTH_template/" + */fileName;
 
 	return intf.snapshot(filePath); 
 }
@@ -404,7 +321,7 @@ static int l_loadScene(lua_State *L) {
 
 	std::string fileName = luaL_checkstring(L, -1);
 
-	std::string filePath = "C:/Users/maxjo/Source/Repos/Lua-Scripting-Course/Lua_Irrlicht_BTH_template/Lua_Irrlicht_BTH_template/" + fileName;
+	std::string filePath = /*"C:/Users/maxjo/Source/Repos/Lua-Scripting-Course/Lua_Irrlicht_BTH_template/Lua_Irrlicht_BTH_template/" + */fileName;
 
 	int error = luaL_loadfile(L, filePath.c_str());
 	if (error) {
@@ -478,12 +395,12 @@ int main()
 	//	Vertex(0, 20, 10)
 	//};
 
-	irr::core::vector3df pos1 = { 20, -20, 10 };
-	irr::core::vector3df pos2 = { -20, -20, 10 };
+	//irr::core::vector3df pos1 = { 20, -20, 10 };
+	//irr::core::vector3df pos2 = { -20, -20, 10 };
 
-	
-	intf.addBox(pos1, 5);
-	intf.addBox(pos2, 5);
+	//
+	//intf.addBox(pos1, 5);
+	//intf.addBox(pos2, 5);
 	//intf.addMesh(vertexs);
 
 	for (int i = 0; i < 10; i++)
@@ -491,7 +408,8 @@ int main()
 		//intf.addBox({(float)i, (float)i, (float)i}, i);
 	}
 
-	intf.setCam(smgr->addCameraSceneNodeFPS());
+	smgr->addCameraSceneNodeFPS();
+
 
 	guienv->addStaticText(L"Hello World! This is the Irrlicht Software renderer!", irr::core::rect<irr::s32>(10, 10, 260, 22), true);
 
@@ -506,18 +424,18 @@ int main()
 
 
 	// Loads the lua testfile
-	//int error = luaL_loadfile(L, "C:/Users/maxjo/Source/Repos/Lua-Scripting-Course/Lua_Irrlicht_BTH_template/Lua_Irrlicht_BTH_template/errorcheck.lua");
-	//if (error) {
-	//	/* If something went wrong, error message is at the top of */
-	//	/* the stack */
-	//	std::cout << lua_tostring(L, -1) << std::endl;
-	//}
-	//error = lua_pcall(L, 0, 0, 0);
-	//if (error) {
-	//	/* If something went wrong, error message is at the top of */
-	//	/* the stack */
-	//	std::cout << lua_tostring(L, -1) << std::endl;
-	//}
+	int error = luaL_loadfile(L, "testfile.lua");
+	if (error) {
+		/* If something went wrong, error message is at the top of */
+		/* the stack */
+		std::cout << lua_tostring(L, -1) << std::endl;
+	}
+	error = lua_pcall(L, 0, 0, 0);
+	if (error) {
+		/* If something went wrong, error message is at the top of */
+		/* the stack */
+		std::cout << lua_tostring(L, -1) << std::endl;
+	}
 
 	
 	while(device->run()) {

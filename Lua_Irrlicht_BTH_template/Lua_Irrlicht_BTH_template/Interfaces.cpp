@@ -51,9 +51,9 @@ int Interface::addMesh(irr::core::array<irr::core::vector3df> posVectors)
 
 	for (int i = 0; i < totalTriangles; i++)
 	{
-		posVectorsPart.push_back(posVectors[0 + nrOfTriangles]);
-		posVectorsPart.push_back(posVectors[1 + nrOfTriangles]);
-		posVectorsPart.push_back(posVectors[2 + nrOfTriangles]);
+		posVectorsPart.push_back(posVectors[0 + nrOfTriangles*3]);
+		posVectorsPart.push_back(posVectors[1 + nrOfTriangles*3]);
+		posVectorsPart.push_back(posVectors[2 + nrOfTriangles*3]);
 
 		testObj = new Object(this->smgr->getRootSceneNode(), this->smgr, this->IDs, posVectorsPart);
 
@@ -180,6 +180,11 @@ int Interface::getNodes()
 			name = dynamic_cast<Box*>(this->nodes[i])->getName();
 			type = dynamic_cast<Box*>(this->nodes[i])->printType();
 		}
+		else if (dynamic_cast<Object*>(this->nodes[i]))
+		{
+			name = "NONAME MESH";
+			type = dynamic_cast<Object*>(this->nodes[i])->printType();
+		}
 
 		//lua_pushnumber(L, 2);
 		lua_pushstring(L, name.c_str());
@@ -212,7 +217,8 @@ int Interface::snapshot(std::string filename)
 	driver->beginScene(true, true, irr::video::SColor(255, 90, 101, 140));	
 	smgr->drawAll();
 	guienv->drawAll();
-		
+	driver->endScene();
+
 	irr::video::IImage* screenshot = this->driver->createScreenShot();
 	this->driver->writeImageToFile(screenshot, filename.c_str());
 
@@ -225,7 +231,6 @@ int Interface::snapshot(std::string filename)
 		luaL_dostring(this->L, "print('Error: file could not be opened')");
 	}
 
-	driver->endScene();
-
+	
 	return 1;
 }

@@ -34,11 +34,11 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="testfile.lua">
+    <None Include="test1.lua" />
+    <None Include="..\Bin\x64\errorcheck.lua">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="test1.lua" />
-    <None Include="errorcheck.lua">
+    <None Include="..\Bin\x64\testfile.lua">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

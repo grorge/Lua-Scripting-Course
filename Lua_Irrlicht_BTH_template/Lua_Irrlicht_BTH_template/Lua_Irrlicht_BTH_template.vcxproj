@@ -149,9 +149,9 @@
     <ClInclude Include="Object.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="errorcheck.lua" />
+    <None Include="..\Bin\x64\errorcheck.lua" />
+    <None Include="..\Bin\x64\testfile.lua" />
     <None Include="test1.lua" />
-    <None Include="testfile.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
