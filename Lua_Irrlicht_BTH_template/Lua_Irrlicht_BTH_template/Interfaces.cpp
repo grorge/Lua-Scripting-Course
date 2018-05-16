@@ -107,43 +107,45 @@ int Interface::addBox(irr::core::vector3df pos, float size)
 
 int Interface::addBox(irr::core::vector3df pos, float size, std::string name)
 {
+	size *= 0.1;
+
 	Vertex v[24] =
 	{
 		// Front
-		Vertex(pos.X - 1.0f * size, pos.Y - 1.0f * size, pos.Z - 1.0f * size) ,
-		Vertex(pos.X - 1.0f * size, pos.Y + 1.0f * size, pos.Z - 1.0f * size),
-		Vertex(pos.X + 1.0f * size, pos.Y + 1.0f * size, pos.Z - 1.0f * size),
-		Vertex(pos.X + 1.0f * size, pos.Y - 1.0f * size, pos.Z - 1.0f * size),
+		Vertex(pos.X - 10.0f * size, pos.Y - 10.0f * size, pos.Z - 10.0f * size) ,
+		Vertex(pos.X - 10.0f * size, pos.Y + 10.0f * size, pos.Z - 10.0f * size),
+		Vertex(pos.X + 10.0f * size, pos.Y + 10.0f * size, pos.Z - 10.0f * size),
+		Vertex(pos.X + 10.0f * size, pos.Y - 10.0f * size, pos.Z - 10.0f * size),
 
 		// Back
-		Vertex(pos.X - 1.0f * size, pos.Y - 1.0f * size, pos.Z + 1.0f * size),
-		Vertex(pos.X + 1.0f * size, pos.Y - 1.0f * size, pos.Z + 1.0f * size),
-		Vertex(pos.X + 1.0f * size, pos.Y + 1.0f * size, pos.Z + 1.0f * size),
-		Vertex(pos.X - 1.0f * size, pos.Y + 1.0f * size, pos.Z + 1.0f * size),
+		Vertex(pos.X - 10.0f * size, pos.Y - 10.0f * size, pos.Z + 10.0f * size),
+		Vertex(pos.X + 10.0f * size, pos.Y - 10.0f * size, pos.Z + 10.0f * size),
+		Vertex(pos.X + 10.0f * size, pos.Y + 10.0f * size, pos.Z + 10.0f * size),
+		Vertex(pos.X - 10.0f * size, pos.Y + 10.0f * size, pos.Z + 10.0f * size),
 
 		// Top
-		Vertex(pos.X - 1.0f * size, pos.Y + 1.0f * size, pos.Z - 1.0f * size),
-		Vertex(pos.X - 1.0f * size, pos.Y + 1.0f * size, pos.Z + 1.0f * size),
-		Vertex(pos.X + 1.0f * size, pos.Y + 1.0f * size, pos.Z + 1.0f * size),
-		Vertex(pos.X + 1.0f * size, pos.Y + 1.0f * size, pos.Z - 1.0f * size),
+		Vertex(pos.X - 10.0f * size, pos.Y + 10.0f * size, pos.Z - 10.0f * size),
+		Vertex(pos.X - 10.0f * size, pos.Y + 10.0f * size, pos.Z + 10.0f * size),
+		Vertex(pos.X + 10.0f * size, pos.Y + 10.0f * size, pos.Z + 10.0f * size),
+		Vertex(pos.X + 10.0f * size, pos.Y + 10.0f * size, pos.Z - 10.0f * size),
 
 		// Bottom
-		Vertex(pos.X - 1.0f * size, pos.Y - 1.0f * size, pos.Z - 1.0f * size),
-		Vertex(pos.X + 1.0f * size, pos.Y - 1.0f * size, pos.Z - 1.0f * size),
-		Vertex(pos.X + 1.0f * size, pos.Y - 1.0f * size, pos.Z + 1.0f * size),
-		Vertex(pos.X - 1.0f * size, pos.Y - 1.0f * size, pos.Z + 1.0f * size),
+		Vertex(pos.X - 10.0f * size, pos.Y - 10.0f * size, pos.Z - 10.0f * size),
+		Vertex(pos.X + 10.0f * size, pos.Y - 10.0f * size, pos.Z - 10.0f * size),
+		Vertex(pos.X + 10.0f * size, pos.Y - 10.0f * size, pos.Z + 10.0f * size),
+		Vertex(pos.X - 10.0f * size, pos.Y - 10.0f * size, pos.Z + 10.0f * size),
 
 		// Left
-		Vertex(pos.X - 1.0f * size, pos.Y - 1.0f * size, pos.Z + 1.0f * size),
-		Vertex(pos.X - 1.0f * size, pos.Y + 1.0f * size, pos.Z + 1.0f * size),
-		Vertex(pos.X - 1.0f * size, pos.Y + 1.0f * size, pos.Z - 1.0f * size),
-		Vertex(pos.X - 1.0f * size, pos.Y - 1.0f * size, pos.Z - 1.0f * size),
+		Vertex(pos.X - 10.0f * size, pos.Y - 10.0f * size, pos.Z + 10.0f * size),
+		Vertex(pos.X - 10.0f * size, pos.Y + 10.0f * size, pos.Z + 10.0f * size),
+		Vertex(pos.X - 10.0f * size, pos.Y + 10.0f * size, pos.Z - 10.0f * size),
+		Vertex(pos.X - 10.0f * size, pos.Y - 10.0f * size, pos.Z - 10.0f * size),
 
 		// Right
-		Vertex(pos.X + 1.0f * size, pos.Y - 1.0f * size, pos.Z - 1.0f * size),
-		Vertex(pos.X + 1.0f * size, pos.Y + 1.0f * size, pos.Z - 1.0f * size),
-		Vertex(pos.X + 1.0f * size, pos.Y + 1.0f * size, pos.Z + 1.0f * size),
-		Vertex(pos.X + 1.0f * size, pos.Y - 1.0f * size, pos.Z + 1.0f * size),
+		Vertex(pos.X + 10.0f * size, pos.Y - 10.0f * size, pos.Z - 10.0f * size),
+		Vertex(pos.X + 10.0f * size, pos.Y + 10.0f * size, pos.Z - 10.0f * size),
+		Vertex(pos.X + 10.0f * size, pos.Y + 10.0f * size, pos.Z + 10.0f * size),
+		Vertex(pos.X + 10.0f * size, pos.Y - 10.0f * size, pos.Z + 10.0f * size),
 	};
 		
 	Box* testObj;
@@ -160,19 +162,14 @@ int Interface::addBox(irr::core::vector3df pos, float size, std::string name)
 
 int Interface::getNodes()
 {
+	//Create a table to contain all tables with information
 	lua_newtable(this->L);
 
 	for (int i = 0; i < this->nodes.size(); i++)
 	{
-		lua_createtable(this->L, 0, 3);
-			
-		//lua_pushnumber(L, 1);
-		lua_pushnumber(L, this->nodes[i]->getID());
-		lua_setfield(this->L, -2, "ID");
-		//lua_rawseti(this->L, -2, 1);
-
-		lua_gettop(L);
-
+		//Create a table to add all the fields and elements to
+		lua_newtable(this->L);
+				
 		std::string name = "NaN mesh";
 		std::string type = "NaN OBJ";
 		if (dynamic_cast<Box*>(this->nodes[i]))
@@ -186,16 +183,25 @@ int Interface::getNodes()
 			type = dynamic_cast<Object*>(this->nodes[i])->printType();
 		}
 
-		//lua_pushnumber(L, 2);
-		lua_pushstring(L, name.c_str());
-		lua_setfield(this->L, -2, "name");
-		
-		//lua_pushnumber(L, 3);
-		lua_pushstring(L, type.c_str());
-		lua_setfield(this->L, -2, "type");
-		//lua_settable(this->L, -3);
+		//This method set the fields at random. cant control the order
 
 		
+		lua_pushstring(L, name.c_str());
+		//Set the next field
+		lua_setfield(this->L, -2, "name");
+
+		
+		lua_pushnumber(L, this->nodes[i]->getID());
+		//Set the next field
+		lua_setfield(this->L, -2, "ID");
+
+
+		//Push string that will be added to the field
+		lua_pushstring(L, type.c_str());
+		//Set the next field
+		lua_setfield(this->L, -2, "type");
+		
+
 		lua_rawseti(this->L, 1, i+1);
 	}
 	
@@ -207,7 +213,6 @@ int Interface::camera(irr::core::vector3df pos, irr::core::vector3df target)
 	this->cam = smgr->addCameraSceneNodeFPS();
 	this->cam->setPosition(pos);
 	this->cam->setTarget(target);
-	//this->cam = smgr->addCameraSceneNode(0, pos, target);
 	
 	return 1;
 }
@@ -223,14 +228,11 @@ int Interface::snapshot(std::string filename)
 	this->driver->writeImageToFile(screenshot, filename.c_str());
 
 	FILE* file;
-
 	fopen_s(&file, filename.c_str(), "r");
-
 	if (!file)
-	{
-		luaL_dostring(this->L, "print('Error: file could not be opened')");
-	}
-
+		luaL_argcheck(this->L,0, 1, "Error: file could not be opened");
+	else
+		fclose(file);
 	
 	return 1;
 }

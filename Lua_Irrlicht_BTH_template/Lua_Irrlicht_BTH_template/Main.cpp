@@ -84,7 +84,8 @@ static int l_addBox(lua_State *L) {
 	
 	// createes the vector to hold the position
 	irr::core::vector3df vector;
-	
+
+
 	// check if its a table	
 	luaL_argcheck(L, lua_istable(L, 1) && lua_isnumber(L, 2), 1, "Error: Wrong arguments");
 
@@ -122,8 +123,8 @@ static int l_addBox(lua_State *L) {
 	luaL_argcheck(L, lua_isnumber(L, 2), 1, "Error: Not a number in size");
 	float s = luaL_checknumber(L, 2);
 
-
-	//luaL_argcheck(L, lua_isstring(L, 3) || lua_isnil(L, 3), 1, "Error: Names must be strings");
+	if (lua_gettop(L) == 3)
+		luaL_argcheck(L, lua_isstring(L, 3), 1, "Error: Names must be strings");
 	//check for a name
 	if (lua_isstring(L, 3))
 	{
